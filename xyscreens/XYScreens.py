@@ -35,7 +35,6 @@ class XYScreens:
         assert serial_port is not None
         assert time_down is None or time_down > 0.0
         assert time_up is None or time_up > 0.0
-        assert position >= 0.0 and position <= 100.0
 
         self._serial_port = serial_port
         self._time_down = time_down
@@ -43,6 +42,12 @@ class XYScreens:
             self._time_up = time_up
         else:
             self._time_up = self._time_down
+
+        self.set_position(position)
+
+    def set_position(self, position: float) -> None:
+        assert position >= 0.0 and position <= 100.0
+
         self._position = position
 
         if self._position == 0.0:

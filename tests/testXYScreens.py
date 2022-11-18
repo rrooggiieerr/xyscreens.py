@@ -127,6 +127,24 @@ class TestXYScreens(unittest.TestCase):
         screen.up()
         self.assertIs(XYScreens.STATE_UPWARD, screen.state())
 
+    def test_set_position_up(self):
+        screen = XYScreens(serial_port)
+        screen.set_position(0.0)
+        self.assertEqual(0.0, screen.position())
+        self.assertIs(XYScreens.STATE_UP, screen.state())
+
+    def test_set_position_down(self):
+        screen = XYScreens(serial_port)
+        screen.set_position(100.0)
+        self.assertEqual(100.0, screen.position())
+        self.assertIs(XYScreens.STATE_DOWN, screen.state())
+    
+    def test_set_position_halfway(self):
+        screen = XYScreens(serial_port)
+        screen.set_position(50.0)
+        self.assertAlmostEqual(50.0, screen.position())
+        self.assertIs(XYScreens.STATE_STOPPED, screen.state())
+
 
 if __name__ == "__main__":
     # import sys;sys.argv = ['', 'Test.testConstructor']
