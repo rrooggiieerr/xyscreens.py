@@ -37,11 +37,13 @@ class XYScreens:
         assert time_up is None or time_up > 0.0
 
         self._serial_port = serial_port
-        self._time_down = time_down
+        if time_down is not None:
+            self._time_down = time_down
+
         if time_up is not None:
             self._time_up = time_up
-        else:
-            self._time_up = self._time_down
+        elif time_down is not None:
+            self._time_up = time_down
 
         self.set_position(position)
 
