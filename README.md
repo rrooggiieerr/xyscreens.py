@@ -24,4 +24,4 @@ Elite Screens\
 KIMEX\
 DELUXX
 
-Please let me know if your projector screen or projector lift works with this integration so I can improve the overview of supported devices.
+Please let me know if your projector screen or projector lift works with this library so I can improve the overview of supported devices.
