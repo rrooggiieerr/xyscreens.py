@@ -110,15 +110,12 @@ class XYScreens:
             if self._position >= 100.0:
                 self._state = self.STATE_DOWN
                 self._position = 100.0
-            logger.debug("update() position: %s", self._position)
         elif self._state == self.STATE_UPWARD and self._time_up is not None:
             self._position = ((time.time() - self._timestamp) / self._time_up) * 100.0
             self._position = 100 - self._position
-            logger.debug("update() position: %s", self._position)
             if self._position <= 0.0:
                 self._state = self.STATE_UP
                 self._position = 0.0
-            logger.debug("update() position: %s", self._position)
 
     def up(self) -> bool:
         logger.debug("up()")
