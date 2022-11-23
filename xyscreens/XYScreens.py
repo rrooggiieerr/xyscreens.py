@@ -17,6 +17,14 @@ class XYScreens:
     STATE_DOWNWARD = 3
     STATE_DOWN = 4
 
+    STATES = {
+        STATE_STOPPED: "Stopped",
+        STATE_UP: "Up",
+        STATE_UPWARD: "Upward",
+        STATE_DOWNWARD: "Downward",
+        STATE_DOWN: "Down",
+    }
+
     _serial_port = None
     _time_up = None
     _time_down = None
