@@ -138,7 +138,7 @@ class TestXYScreens(unittest.TestCase):
         screen.set_position(100.0)
         self.assertEqual(100.0, screen.position())
         self.assertIs(XYScreens.STATE_DOWN, screen.state())
-    
+
     def test_set_position_halfway(self):
         screen = XYScreens(serial_port)
         screen.set_position(50.0)
