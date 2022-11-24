@@ -27,13 +27,13 @@ DELUXX
 Please let me know if your projector screen or projector lift works with this library so I can improve the overview of supported devices.
 
 # Installation
-You can install the Python XY Screens library using the Python package manager PIP:
+You can install the Python XY Screens library using the Python package manager PIP:\
 `pip3 install xyscreens`
 
 # xyscreens CLI
 You can use the Python XY Screens library directly from the command line to move your screen up or down or to stop the screen using the follwoing syntax:
 
-Move the scren down: `python3 -m xyscreens /dev/tty.usbserial-110 down`
+Move the screen down: `python3 -m xyscreens /dev/tty.usbserial-110 down`
 Stop the screen: `python3 -m xyscreens /dev/tty.usbserial-110 stop`
 Move the screen up: `python3 -m xyscreens /dev/tty.usbserial-110 up`
 
