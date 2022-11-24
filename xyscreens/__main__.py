@@ -7,7 +7,7 @@ import argparse
 import logging
 import time
 
-from xyscreens.XYScreens import XYScreens
+from xyscreens.xyscreens import XYScreens
 
 logger = logging.getLogger(__name__)
 loglevel = logging.INFO
