@@ -9,8 +9,7 @@ import time
 
 from xyscreens.xyscreens import XYScreens
 
-logger = logging.getLogger(__name__)
-loglevel = logging.INFO
+_LOGGER = logging.getLogger(__name__)
 
 
 if __name__ == "__main__":
@@ -24,12 +23,11 @@ if __name__ == "__main__":
     args = argparser.parse_args()
 
     if args.debugLogging:
-        loglevel = logging.DEBUG
         logging.basicConfig(
-            format="%(asctime)s %(levelname)-8s %(message)s", level=loglevel
+            format="%(asctime)s %(levelname)-8s %(message)s", level=logging.DEBUG
         )
     else:
-        logging.basicConfig(format="%(message)s", level=loglevel)
+        logging.basicConfig(format="%(message)s", level=logging.INFO)
 
     if args.action == "up":
         screen = XYScreens(args.port, time_up=args.wait, position=100.0)
@@ -40,7 +38,7 @@ if __name__ == "__main__":
                 if not args.debugLogging:
                     print(f"{screen.STATES[state]:8}: {position:5.1f} %", end="\r")
                 else:
-                    logger.info("%s: %5.1f %%", screen.STATES[state], position)
+                    _LOGGER.info("%s: %5.1f %%", screen.STATES[state], position)
                 if state == screen.STATE_UP:
                     if not args.debugLogging:
                         print()
@@ -58,7 +56,7 @@ if __name__ == "__main__":
                 if not args.debugLogging:
                     print(f"{screen.STATES[state]:8}: {position:5.1f} %", end="\r")
                 else:
-                    logger.info("%s: %5.1f %%", screen.STATES[state], position)
+                    _LOGGER.info("%s: %5.1f %%", screen.STATES[state], position)
                 if state == screen.STATE_DOWN:
                     if not args.debugLogging:
                         print()
