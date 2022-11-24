@@ -1,7 +1,7 @@
 """
 Created on 18 Nov 2022
 
-@author: rogier
+@author: Rogier van Staveren
 """
 import argparse
 import logging

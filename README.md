@@ -9,31 +9,32 @@ where position 5 of the RJ25 connector is connected to D+ and position 6 to the 
 
 See the documentation of your specific device on how to wire yours correctly.
 
+## Protocol
 This are the protocol details:\
 2400 baud 8N1\
-up command  : 0xFF 0xAA 0xEE 0xEE 0xDD\
-down command: 0xFF 0xAA 0xEE 0xEE 0xEE\
-stop command: 0xFF 0xAA 0xEE 0xEE 0xCC
+Up command  : 0xFF 0xAA 0xEE 0xEE 0xDD\
+Down command: 0xFF 0xAA 0xEE 0xEE 0xEE\
+Stop command: 0xFF 0xAA 0xEE 0xEE 0xCC
 
-Known to work:\
-iVisions Electro M Series
+## Known to work:
+* iVisions Electro M Series
 
-Not tested but uses the same protocol according to the documentation:\
-iVisions Electro L/XL/Pro/HD Series\
-iVisions PL Series projector lift\
-Elite Screens\
-KIMEX\
-DELUXX
+Not tested but uses the same protocol according to the documentation:
+* iVisions Electro L/XL/Pro/HD Series
+* iVisions PL Series projector lift
+* Elite Screens
+* KIMEX
+* DELUXX
 
 Please let me know if your projector screen or projector lift works with this
 library so I can improve the overview of supported devices.
 
-# Installation
+## Installation
 You can install the Python XY Screens library using the Python package manager
 PIP:\
 `pip3 install xyscreens`
 
-# xyscreens CLI
+## xyscreens CLI
 You can use the Python XY Screens library directly from the command line to
 move your screen up or down or to stop the screen using the follwoing syntax:
 

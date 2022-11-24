@@ -1,7 +1,7 @@
 """
 Created on 16 Nov 2022
 
-@author: rogier
+@author: Rogier van Staveren
 """
 import logging
 import time
