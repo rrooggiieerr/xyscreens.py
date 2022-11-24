@@ -1,5 +1,6 @@
 # Python library to control XY Screens projector screens and projector lifts.
-Python library to control XY Screens projector screens and projector lifts over the RS-485 interface.
+Python library to control XY Screens projector screens and projector lifts
+over the RS-485 interface.
 
 XY Screens is an OEM manufacturer of projector screens and projector lifts.
 
@@ -24,17 +25,22 @@ Elite Screens\
 KIMEX\
 DELUXX
 
-Please let me know if your projector screen or projector lift works with this library so I can improve the overview of supported devices.
+Please let me know if your projector screen or projector lift works with this
+library so I can improve the overview of supported devices.
 
 # Installation
-You can install the Python XY Screens library using the Python package manager PIP:\
+You can install the Python XY Screens library using the Python package manager
+PIP:\
 `pip3 install xyscreens`
 
 # xyscreens CLI
-You can use the Python XY Screens library directly from the command line to move your screen up or down or to stop the screen using the follwoing syntax:
+You can use the Python XY Screens library directly from the command line to
+move your screen up or down or to stop the screen using the follwoing syntax:
 
-Move the screen down: `python3 -m xyscreens /dev/tty.usbserial-110 down`
-Stop the screen: `python3 -m xyscreens /dev/tty.usbserial-110 stop`
+Move the screen down: `python3 -m xyscreens /dev/tty.usbserial-110 down`\
+Stop the screen: `python3 -m xyscreens /dev/tty.usbserial-110 stop`\
 Move the screen up: `python3 -m xyscreens /dev/tty.usbserial-110 up`
 
-If you add the arguments `--wait <time>` to the down and up commands where `<time>` is the time in seconds to move the screen down, respectively up, the process will wait till the screen is down/up and show the progress.
+If you add the arguments `--wait <time>` to the down and up commands where
+`<time>` is the time in seconds to move the screen down, respectively up, the
+process will wait till the screen is down/up and show the progress.
