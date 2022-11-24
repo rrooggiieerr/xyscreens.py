@@ -108,7 +108,7 @@ class XYScreens:
         """
         # Make sure the given screen position is within the range of
         # 0.0% to 100.0%
-        assert position >= 0.0 and position <= 100.0
+        assert 0.0 <= position <= 100.0
 
         self._position = position
 
