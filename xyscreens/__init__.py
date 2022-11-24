@@ -6,6 +6,6 @@ Created on 17 Nov 2022
 
 @author: Rogier van Staveren
 """
-__version__ = "0.0.2"
+__version__ = "0.0.3"
 
 from xyscreens.xyscreens import XYScreens
