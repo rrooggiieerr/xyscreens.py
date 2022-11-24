@@ -51,10 +51,8 @@ class XYScreens:
     _serial_port = None
     # Time in seconds for the screen to go up.
     _time_up = None
-    _time_up = 60
     # Time in seconds for the screen to go down.
     _time_down = None
-    _time_down = 60
 
     # Current state of the screen. Defaults to Up when object is created.
     _state = STATE_UP
