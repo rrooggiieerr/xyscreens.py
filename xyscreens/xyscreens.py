@@ -180,6 +180,7 @@ class XYScreens:
                 self._state = self.STATE_UP
                 self._position = 0.0
 
+    # pylint: disable=C0103
     def up(self) -> bool:
         """
         Move the screen up.
