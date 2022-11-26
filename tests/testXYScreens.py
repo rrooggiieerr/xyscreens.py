@@ -21,7 +21,7 @@ serial_port = "/dev/tty.usbserial-110"
 class TestXYScreens(unittest.TestCase):
     def test_constructor(self):
         screen = XYScreens(serial_port)
-        self.assertIsNotNone(screen, None)
+        self.assertIsNotNone(screen)
 
     def test_constructor2(self):
         screen = XYScreens(serial_port, 60, 60)
