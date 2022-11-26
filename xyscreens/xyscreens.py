@@ -166,7 +166,8 @@ class XYScreens:
 
     def _update(self) -> None:
         """
-        Calculates the position of the screen based on the direction the screen is moving.
+        Calculates the position of the screen based on the direction the
+        screen is moving.
         """
         if self._state == self.STATE_DOWNWARD and self._time_down is not None:
             self._position = ((time.time() - self._timestamp) / self._time_down) * 100.0
