@@ -2,6 +2,8 @@
 Python library to control XY Screens projector screens and projector lifts
 over the RS-485 interface.
 
+[<img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" style="height: 60px !important;width: 217px !important;" >](https://www.buymeacoffee.com/rrooggiieerr)  
+
 XY Screens is an OEM manufacturer of projector screens and projector lifts.
 
 ## Hardware
