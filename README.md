@@ -38,7 +38,7 @@ PIP:\
 
 ## xyscreens CLI
 You can use the Python XY Screens library directly from the command line to
-move your screen up or down or to stop the screen using the follwoing syntax:
+move your screen up or down or to stop the screen using the following syntax:
 
 Move the screen down: `python3 -m xyscreens <serial port> down`\
 Stop the screen: `python3 -m xyscreens <serial port> stop`\
