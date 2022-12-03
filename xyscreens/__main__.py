@@ -29,36 +29,41 @@ if __name__ == "__main__":
     else:
         logging.basicConfig(format="%(message)s", level=logging.INFO)
 
-    if args.action == "up":
-        screen = XYScreens(args.port, time_up=args.wait, position=100.0)
-        if screen.up():
-            while True:
-                state = screen.state()
-                position = screen.position()
-                if not args.debugLogging:
-                    print(f"{screen.STATES[state]:8}: {position:5.1f} %", end="\r")
-                else:
-                    _LOGGER.info("%s: %5.1f %%", screen.STATES[state], position)
-                if state == screen.STATE_UP:
+    try:
+        if args.action == "up":
+            screen = XYScreens(args.port, time_up=args.wait, position=100.0)
+            if screen.up():
+                while True:
+                    state = screen.state()
+                    position = screen.position()
                     if not args.debugLogging:
-                        print()
-                    break
-                time.sleep(0.1)
-    elif args.action == "stop":
-        screen = XYScreens(args.port)
-        screen.stop()
-    elif args.action == "down":
-        screen = XYScreens(args.port, time_down=args.wait, position=0.0)
-        if screen.down():
-            while True:
-                state = screen.state()
-                position = screen.position()
-                if not args.debugLogging:
-                    print(f"{screen.STATES[state]:8}: {position:5.1f} %", end="\r")
-                else:
-                    _LOGGER.info("%s: %5.1f %%", screen.STATES[state], position)
-                if state == screen.STATE_DOWN:
+                        print(f"{screen.STATES[state]:8}: {position:5.1f} %", end="\r")
+                    else:
+                        _LOGGER.info("%s: %5.1f %%", screen.STATES[state], position)
+                    if state == screen.STATE_UP:
+                        if not args.debugLogging:
+                            print()
+                        break
+                    time.sleep(0.1)
+        elif args.action == "stop":
+            screen = XYScreens(args.port)
+            screen.stop()
+        elif args.action == "down":
+            screen = XYScreens(args.port, time_down=args.wait, position=0.0)
+            if screen.down():
+                while True:
+                    state = screen.state()
+                    position = screen.position()
                     if not args.debugLogging:
-                        print()
-                    break
-                time.sleep(0.1)
+                        print(f"{screen.STATES[state]:8}: {position:5.1f} %", end="\r")
+                    else:
+                        _LOGGER.info("%s: %5.1f %%", screen.STATES[state], position)
+                    if state == screen.STATE_DOWN:
+                        if not args.debugLogging:
+                            print()
+                        break
+                    time.sleep(0.1)
+    except KeyboardInterrupt:
+        # Handle keyboard interrupt
+        pass
+
