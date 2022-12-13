@@ -21,7 +21,7 @@ _COMMAND_DOWN = bytearray.fromhex("FFAAEEEEEE")
 
 class XYScreens:
     """
-    XY Screens class for controlling XY Screens projector screens and
+    XYScreens class for controlling XY Screens projector screens and
     projector lifts.
     """
 
@@ -48,18 +48,18 @@ class XYScreens:
     }
 
     # The serial port where the RS-485 interface and screen is connected to.
-    _serial_port = None
+    _serial_port: str = None
     # Time in seconds for the screen to go up.
-    _time_up = None
+    _time_up: float = None
     # Time in seconds for the screen to go down.
-    _time_down = None
+    _time_down: float = None
 
     # Current state of the screen. Defaults to Up when object is created.
-    _state = STATE_UP
+    _state: int = STATE_UP
     # Position of the screen where 0.0 is totally up and 100.0 is fully down.
-    _position = 0.0
+    _position: float = 0.0
     # Timestamp when the up or down command has been executed.
-    _timestamp = None
+    _timestamp: float = None
 
     def __init__(
         self,
@@ -138,9 +138,9 @@ class XYScreens:
                 stopbits=serial.STOPBITS_ONE,
                 timeout=1,
             )
-        except serial.SerialException as e:
+        except serial.SerialException as ex:
             logger.exception(
-                "Unable to connect to the device %s: %s", self._serial_port, e
+                "Unable to connect to the device %s: %s", self._serial_port, ex
             )
             return False
         logger.debug("Device %s connected", self._serial_port)
@@ -157,8 +157,8 @@ class XYScreens:
 
             # Close the connection.
             connection.close()
-        except serial.SerialException as e:
-            logger.exception("Error while writing device %s: %s", self._serial_port, e)
+        except serial.SerialException as ex:
+            logger.exception("Error while writing device %s: %s", self._serial_port, ex)
         else:
             return True
 

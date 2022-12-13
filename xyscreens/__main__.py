@@ -34,8 +34,8 @@ if __name__ == "__main__":
             screen = XYScreens(args.port, time_up=args.wait, position=100.0)
             if screen.up():
                 while True:
-                    state = screen.state()
-                    position = screen.position()
+                    state: int = screen.state()
+                    position: float = screen.position()
                     if not args.debugLogging:
                         print(f"{screen.STATES[state]:8}: {position:5.1f} %", end="\r")
                     else:
@@ -52,8 +52,8 @@ if __name__ == "__main__":
             screen = XYScreens(args.port, time_down=args.wait, position=0.0)
             if screen.down():
                 while True:
-                    state = screen.state()
-                    position = screen.position()
+                    state: int = screen.state()
+                    position: float = screen.position()
                     if not args.debugLogging:
                         print(f"{screen.STATES[state]:8}: {position:5.1f} %", end="\r")
                     else:
@@ -66,4 +66,3 @@ if __name__ == "__main__":
     except KeyboardInterrupt:
         # Handle keyboard interrupt
         pass
-
