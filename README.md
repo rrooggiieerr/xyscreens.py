@@ -2,8 +2,6 @@
 Python library to control XY Screens projector screens and projector lifts
 over the RS-485 interface.
 
-[<img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" style="height: 60px !important;width: 217px !important;" >](https://www.buymeacoffee.com/rrooggiieerr)  
-
 XY Screens is an OEM manufacturer of projector screens and projector lifts.
 
 ## Hardware
@@ -49,3 +47,6 @@ Move the screen up: `python3 -m xyscreens <serial port> up`
 If you add the arguments `--wait <time>` to the down and up commands where
 `<time>` is the time in seconds to move the screen down, respectively up, the
 process will wait till the screen is down/up and show the progress.
+
+Do you enjoy using this Python library? Then consider supporting my work:\
+[<img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" style="height: 60px !important;width: 217px !important;" >](https://www.buymeacoffee.com/rrooggiieerr)  
