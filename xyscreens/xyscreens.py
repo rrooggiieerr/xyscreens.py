@@ -49,18 +49,18 @@ class XYScreens:
     }
 
     # The serial port where the RS-485 interface and screen is connected to.
-    _serial_port: str = None
+    _serial_port: str | None = None
     # Time in seconds for the screen to go up.
-    _time_up: float = None
+    _time_up: float | None = None
     # Time in seconds for the screen to go down.
-    _time_down: float = None
+    _time_down: float | None = None
 
     # Current state of the screen. Defaults to Up when object is created.
     _state: int = STATE_UP
     # Position of the screen where 0.0 is totally up and 100.0 is fully down.
     _position: float = 0.0
     # Timestamp when the up or down command has been executed.
-    _timestamp: float = None
+    _timestamp: float | None = None
 
     def __init__(
         self,
@@ -128,7 +128,7 @@ class XYScreens:
         else:
             self._state = self.STATE_STOPPED
 
-    def _send_command(self, command: str) -> bool:
+    def _send_command(self, command: bytearray) -> bool:
         try:
             # Create the connection instance.
             connection = serial.Serial(
