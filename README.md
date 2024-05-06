@@ -28,7 +28,7 @@ connector is connected to D+ and position 6 to the D-.
 
 See the documentation of your specific device on how to wire yours correctly.
 
-## Supported protocol
+## Protocol
 
 If your devices follows the following protocol it's supported by this Python library:
 
@@ -37,13 +37,13 @@ Up command  : 0xFFAAEEEEDD
 Down command: 0xFFAAEEEEEE  
 Stop command: 0xFFAAEEEECC
 
-## Known to work
+## Supported projector screens and lifts
 
-The following device is known to work:
+The following projector screens is known to work:
 
 * iVisions Electro M Series
 
-The following device are not tested but use the same protocol according to the documentation:
+The following projector screens and lifts are not tested but use the same protocol according to the documentation:
 
 * iVisions Electro L/XL/Pro/HD Series
 * iVisions PL Series projector lift
@@ -51,7 +51,8 @@ The following device are not tested but use the same protocol according to the d
 * KIMEX
 * DELUXX
 
-Please let me know if your projector screen or projector lift works with this Python library so I can improve the overview of supported devices.
+Please let me know if your projector screen or projector lift works with this Python library so I
+can improve the overview of supported projector screens and lifts.
 
 ## Installation
 
@@ -59,7 +60,7 @@ You can install the Python XY Screens library using the Python package manager P
 
 `pip3 install xyscreens`
 
-## xyscreens CLI
+## `xyscreens` CLI
 
 You can use the Python XY Screens library directly from the command line to move your screen up or down or to stop the screen using the following syntax:
 
@@ -70,9 +71,16 @@ Move the screen up: `python3 -m xyscreens <serial port> up`
 If you add the arguments `--wait <time>` to the down and up commands where `<time>` is the time in seconds to move the screen down, respectively up, the
 process will wait till the screen is down/up and show the progress.
 
+### Troubleshooting
+
+You can add the `--debug` flag to any CLI command to get a more details on what's going on. Like so:
+
+`python3 -m xyscreens <serial port> down --debug`
+
 ## Support my work
 
-Do you enjoy using this Python library? Then consider supporting my work using one of the following platforms:
+Do you enjoy using this Python library? Then consider supporting my work using one of the following
+platforms:
 
 [![Github Sponsors][github-shield]][github]
 [![PayPal][paypal-shield]][paypal]
