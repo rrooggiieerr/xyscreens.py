@@ -65,11 +65,11 @@ class XYScreens:
     _time_down: float | None = None
 
     # Current state of the screen. Defaults to Up when object is created.
-    _state: int = XYScreensState.UP
+    _state: XYScreensState = XYScreensState.UP
     # Position of the screen where 0.0 is totally up and 100.0 is fully down.
     _position: float = 0.0
     # Timestamp when the up or down command has been executed.
-    _timestamp: float | None = None
+    _timestamp: float
 
     def __init__(
         self,
@@ -126,7 +126,7 @@ class XYScreens:
         else:
             self._state = XYScreensState.STOPPED
 
-    def _send_command(self, command: bytearray) -> bool:
+    def _send_command(self, command: bytes) -> bool:
         try:
             # Create the connection instance.
             connection = serial.Serial(
@@ -163,7 +163,7 @@ class XYScreens:
 
         return False
 
-    async def _async_send_command(self, command: str) -> bool:
+    async def _async_send_command(self, command: bytes) -> bool:
         try:
             _, writer = await serial_asyncio.open_serial_connection(
                 url=self._serial_port,
@@ -315,7 +315,7 @@ class XYScreens:
 
         return False
 
-    def state(self) -> int:
+    def state(self) -> XYScreensState:
         "Returns the current state of the screen."
         self._update()
 

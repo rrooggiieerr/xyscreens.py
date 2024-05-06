@@ -20,8 +20,8 @@ async def main(port: str, wait: int, action: str):
             screen = XYScreens(port, time_up=wait, position=100.0)
             if await screen.async_up():
                 while True:
-                    state: int = screen.state()
-                    position: float = screen.position()
+                    state = screen.state()
+                    position = screen.position()
                     if _LOGGER.level <= logging.DEBUG:
                         print(f"{state!s:8}: {position:5.1f} %", end="\r")
                     else:
@@ -38,8 +38,8 @@ async def main(port: str, wait: int, action: str):
             screen = XYScreens(port, time_down=wait, position=0.0)
             if await screen.async_down():
                 while True:
-                    state: int = screen.state()
-                    position: float = screen.position()
+                    state = screen.state()
+                    position = screen.position()
                     if _LOGGER.level <= logging.DEBUG:
                         print(f"{state!s:8}: {position:5.1f} %", end="\r")
                     else:
