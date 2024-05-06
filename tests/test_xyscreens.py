@@ -4,17 +4,10 @@ Created on 16 Nov 2022
 @author: Rogier van Staveren
 """
 
-import logging
 import time
 import unittest
 
 from xyscreens import XYScreens
-
-logger = logging.getLogger(__name__)
-logging.basicConfig(
-    format="%(asctime)s %(levelname)-8s %(message)s", level=logging.DEBUG
-)
-
 
 serial_port = "/dev/tty.usbserial-110"
 
