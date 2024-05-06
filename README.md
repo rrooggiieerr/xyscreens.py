@@ -2,7 +2,7 @@
 
 ![Python][python-shield]
 [![GitHub Release][releases-shield]][releases]
-[![Licence][license-badge]][license]\
+[![Licence][license-badge]][license]  
 [![Github Sponsors][github-shield]][github]
 [![PayPal][paypal-shield]][paypal]
 [![BuyMeCoffee][buymecoffee-shield]][buymecoffee]
@@ -32,9 +32,9 @@ See the documentation of your specific device on how to wire yours correctly.
 
 If your devices follows the following protocol it's supported by this Python library:
 
-2400 baud 8N1\
-Up command  : 0xFFAAEEEEDD\
-Down command: 0xFFAAEEEEEE\
+2400 baud 8N1  
+Up command  : 0xFFAAEEEEDD  
+Down command: 0xFFAAEEEEEE  
 Stop command: 0xFFAAEEEECC
 
 ## Known to work
@@ -63,14 +63,14 @@ You can install the Python XY Screens library using the Python package manager P
 
 You can use the Python XY Screens library directly from the command line to move your screen up or down or to stop the screen using the following syntax:
 
-Move the screen down: `python3 -m xyscreens <serial port> down`\
-Stop the screen: `python3 -m xyscreens <serial port> stop`\
+Move the screen down: `python3 -m xyscreens <serial port> down`  
+Stop the screen: `python3 -m xyscreens <serial port> stop`  
 Move the screen up: `python3 -m xyscreens <serial port> up`
 
 If you add the arguments `--wait <time>` to the down and up commands where `<time>` is the time in seconds to move the screen down, respectively up, the
 process will wait till the screen is down/up and show the progress.
 
-## Support
+## Support my work
 
 Do you enjoy using this Python library? Then consider supporting my work using one of the following platforms:
 
