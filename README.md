@@ -8,7 +8,7 @@
 [![BuyMeCoffee][buymecoffee-shield]][buymecoffee]
 [![Patreon][patreon-shield]][patreon]
 
-# Introduction
+## Introduction
 
 This python library lets you control XY Screens projector screens and lifts over the RS-485 interface.
 
