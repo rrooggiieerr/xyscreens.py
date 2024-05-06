@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "xyscreens"
-version = "0.0.6"
+version = "0.1.0"
 license = {text = "Apache-2.0"}
 authors = [
     { name="Rogier van Staveren" }
@@ -19,7 +19,8 @@ classifiers = [
     "Operating System :: OS Independent",
 ]
 dependencies = [
-    "pyserial>=3.4"
+    "pyserial>=3.5",
+    "pyserial_asyncio>=6"
 ]
 
 [project.urls]
