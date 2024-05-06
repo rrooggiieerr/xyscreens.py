@@ -4,140 +4,231 @@ Created on 16 Nov 2022
 @author: Rogier van Staveren
 """
 
+import asyncio
 import time
 import unittest
 
-from xyscreens import XYScreens
+from xyscreens import XYScreens, XYScreensState
 
-serial_port = "/dev/tty.usbserial-110"
+from . import async_test
+
+_SERIAL_PORT = "/dev/tty.usbserial-110"
 
 
 class TestXYScreens(unittest.TestCase):
     def test_constructor(self):
-        screen = XYScreens(serial_port)
+        screen = XYScreens(_SERIAL_PORT)
         self.assertIsNotNone(screen)
 
     def test_constructor2(self):
-        screen = XYScreens(serial_port, 60, 60)
+        screen = XYScreens(_SERIAL_PORT, 60, 60)
         self.assertIsNotNone(screen)
 
     def test_constructor3(self):
-        screen = XYScreens(serial_port, 60, 60, 100.0)
+        screen = XYScreens(_SERIAL_PORT, 60, 60, 100.0)
         self.assertIsNotNone(screen)
 
     def test_constructor_up(self):
-        screen = XYScreens(serial_port, position=0.0)
-        self.assertIs(XYScreens.STATE_UP, screen.state())
+        screen = XYScreens(_SERIAL_PORT, position=0.0)
+        self.assertIs(XYScreensState.UP, screen.state())
         self.assertIs(0.0, screen.position())
 
     def test_constructor_down(self):
-        screen = XYScreens(serial_port, position=100.0)
-        self.assertIs(XYScreens.STATE_DOWN, screen.state())
+        screen = XYScreens(_SERIAL_PORT, position=100.0)
+        self.assertIs(XYScreensState.DOWN, screen.state())
         self.assertIs(100.0, screen.position())
 
     def test_constructor_stopped(self):
-        screen = XYScreens(serial_port, position=50.0)
-        self.assertIs(XYScreens.STATE_STOPPED, screen.state())
+        screen = XYScreens(_SERIAL_PORT, position=50.0)
+        self.assertIs(XYScreensState.STOPPED, screen.state())
         self.assertIs(50.0, screen.position())
 
     def test_constructor_negative_position(self):
-        self.assertRaises(AssertionError, XYScreens, serial_port, position=-0.00001)
+        self.assertRaises(AssertionError, XYScreens, _SERIAL_PORT, position=-0.00001)
 
     def test_constructor_toolarge_position(self):
-        self.assertRaises(AssertionError, XYScreens, serial_port, position=100.00001)
+        self.assertRaises(AssertionError, XYScreens, _SERIAL_PORT, position=100.00001)
 
     def test_down(self):
-        screen = XYScreens(serial_port, 60, 60)
+        screen = XYScreens(_SERIAL_PORT, 60, 60)
         self.assertTrue(screen.down())
 
     def test_up(self):
-        screen = XYScreens(serial_port, 60, 60, 100)
+        screen = XYScreens(_SERIAL_PORT, 60, 60, 100)
         self.assertTrue(screen.up())
 
     def test_stop(self):
-        screen = XYScreens(serial_port, 60, 60)
+        screen = XYScreens(_SERIAL_PORT, 60, 60)
         screen.down()
         time.sleep(1)
         self.assertTrue(screen.stop())
 
     def test_state_up(self):
-        screen = XYScreens(serial_port, 10, 10, 100)
+        screen = XYScreens(_SERIAL_PORT, 10, 10, 100)
         screen.up()
         time.sleep(10)
-        self.assertIs(XYScreens.STATE_UP, screen.state())
+        self.assertIs(XYScreensState.UP, screen.state())
 
     def test_state_closing(self):
-        screen = XYScreens(serial_port, 60, 60, 100)
+        screen = XYScreens(_SERIAL_PORT, 60, 60, 100)
         screen.up()
-        self.assertIs(XYScreens.STATE_UPWARD, screen.state())
+        self.assertIs(XYScreensState.UPWARD, screen.state())
 
     def test_state_stopped(self):
-        screen = XYScreens(serial_port, 10, 10)
+        screen = XYScreens(_SERIAL_PORT, 10, 10)
         screen.down()
         time.sleep(5)
         screen.stop()
-        self.assertIs(XYScreens.STATE_STOPPED, screen.state())
+        self.assertIs(XYScreensState.STOPPED, screen.state())
 
     def test_state_downward(self):
-        screen = XYScreens(serial_port, 10, 10)
+        screen = XYScreens(_SERIAL_PORT, 10, 10)
         screen.down()
-        self.assertIs(XYScreens.STATE_DOWNWARD, screen.state())
+        self.assertIs(XYScreensState.DOWNWARD, screen.state())
 
     def test_state_down(self):
-        screen = XYScreens(serial_port, 10, 10)
+        screen = XYScreens(_SERIAL_PORT, 10, 10)
         screen.down()
         time.sleep(10)
-        self.assertIs(XYScreens.STATE_DOWN, screen.state())
+        self.assertIs(XYScreensState.DOWN, screen.state())
 
     def test_position_up(self):
-        screen = XYScreens(serial_port, 10, 10, 100)
+        screen = XYScreens(_SERIAL_PORT, 10, 10, 100)
         screen.up()
         time.sleep(10)
-        self.assertEquals(0.0, screen.position())
+        self.assertEqual(0.0, screen.position())
 
     def test_position_down(self):
-        screen = XYScreens(serial_port, 10, 10)
+        screen = XYScreens(_SERIAL_PORT, 10, 10)
         screen.down()
         time.sleep(10)
-        self.assertEquals(100.0, screen.position())
+        self.assertEqual(100.0, screen.position())
 
     def test_position_halfway(self):
-        screen = XYScreens(serial_port, 10, 10)
+        screen = XYScreens(_SERIAL_PORT, 10, 10)
         screen.down()
         time.sleep(5)
         self.assertAlmostEqual(50.0, screen.position(), delta=0.1)
 
     def test_change_direction_down(self):
-        screen = XYScreens(serial_port, 10, 10, 100)
+        screen = XYScreens(_SERIAL_PORT, 10, 10, 100)
         screen.up()
         time.sleep(5)
         screen.down()
-        self.assertIs(XYScreens.STATE_DOWNWARD, screen.state())
+        self.assertIs(XYScreensState.DOWNWARD, screen.state())
 
     def test_change_direction_up(self):
-        screen = XYScreens(serial_port, 10, 10)
+        screen = XYScreens(_SERIAL_PORT, 10, 10)
         screen.down()
         time.sleep(5)
         screen.up()
-        self.assertIs(XYScreens.STATE_UPWARD, screen.state())
+        self.assertIs(XYScreensState.UPWARD, screen.state())
+
+    @async_test
+    async def test_async_down(self):
+        screen = XYScreens(_SERIAL_PORT, 60, 60)
+        self.assertTrue(await screen.async_down())
+
+    @async_test
+    async def test_async_up(self):
+        screen = XYScreens(_SERIAL_PORT, 60, 60, 100)
+        self.assertTrue(await screen.async_up())
+
+    @async_test
+    async def test_async_stop(self):
+        screen = XYScreens(_SERIAL_PORT, 60, 60)
+        await screen.async_down()
+        await asyncio.sleep(1)
+        self.assertTrue(await screen.async_stop())
+
+    @async_test
+    async def test_async_state_up(self):
+        screen = XYScreens(_SERIAL_PORT, 10, 10, 100)
+        await screen.async_up()
+        await asyncio.sleep(10)
+        self.assertIs(XYScreensState.UP, screen.state())
+
+    @async_test
+    async def test_async_state_closing(self):
+        screen = XYScreens(_SERIAL_PORT, 60, 60, 100)
+        await screen.async_up()
+        self.assertIs(XYScreensState.UPWARD, screen.state())
+
+    @async_test
+    async def test_async_state_stopped(self):
+        screen = XYScreens(_SERIAL_PORT, 10, 10)
+        await screen.async_down()
+        await asyncio.sleep(5)
+        await screen.async_stop()
+        self.assertIs(XYScreensState.STOPPED, screen.state())
+
+    @async_test
+    async def test_async_state_downward(self):
+        screen = XYScreens(_SERIAL_PORT, 10, 10)
+        await screen.async_down()
+        self.assertIs(XYScreensState.DOWNWARD, screen.state())
+
+    @async_test
+    async def test_async_state_down(self):
+        screen = XYScreens(_SERIAL_PORT, 10, 10)
+        await screen.async_down()
+        await asyncio.sleep(10)
+        self.assertIs(XYScreensState.DOWN, screen.state())
+
+    @async_test
+    async def test_async_position_up(self):
+        screen = XYScreens(_SERIAL_PORT, 10, 10, 100)
+        await screen.async_up()
+        await asyncio.sleep(10)
+        self.assertEqual(0.0, screen.position())
+
+    @async_test
+    async def test_async_position_down(self):
+        screen = XYScreens(_SERIAL_PORT, 10, 10)
+        await screen.async_down()
+        await asyncio.sleep(10)
+        self.assertEqual(100.0, screen.position())
+
+    @async_test
+    async def test_async_position_halfway(self):
+        screen = XYScreens(_SERIAL_PORT, 10, 10)
+        await screen.async_down()
+        await asyncio.sleep(5)
+        self.assertAlmostEqual(50.0, screen.position(), delta=0.1)
+
+    @async_test
+    async def test_async_change_direction_down(self):
+        screen = XYScreens(_SERIAL_PORT, 10, 10, 100)
+        await screen.async_up()
+        await asyncio.sleep(5)
+        await screen.async_down()
+        self.assertIs(XYScreensState.DOWNWARD, screen.state())
+
+    @async_test
+    async def test_async_change_direction_up(self):
+        screen = XYScreens(_SERIAL_PORT, 10, 10)
+        await screen.async_down()
+        await asyncio.sleep(5)
+        await screen.async_up()
+        self.assertIs(XYScreensState.UPWARD, screen.state())
 
     def test_set_position_up(self):
-        screen = XYScreens(serial_port)
+        screen = XYScreens(_SERIAL_PORT)
         screen.set_position(0.0)
         self.assertEqual(0.0, screen.position())
-        self.assertIs(XYScreens.STATE_UP, screen.state())
+        self.assertIs(XYScreensState.UP, screen.state())
 
     def test_set_position_down(self):
-        screen = XYScreens(serial_port)
+        screen = XYScreens(_SERIAL_PORT)
         screen.set_position(100.0)
         self.assertEqual(100.0, screen.position())
-        self.assertIs(XYScreens.STATE_DOWN, screen.state())
+        self.assertIs(XYScreensState.DOWN, screen.state())
 
     def test_set_position_halfway(self):
-        screen = XYScreens(serial_port)
+        screen = XYScreens(_SERIAL_PORT)
         screen.set_position(50.0)
         self.assertAlmostEqual(50.0, screen.position())
-        self.assertIs(XYScreens.STATE_STOPPED, screen.state())
+        self.assertIs(XYScreensState.STOPPED, screen.state())
 
 
 if __name__ == "__main__":
