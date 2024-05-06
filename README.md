@@ -18,6 +18,8 @@ XY Screens is an OEM manufacturer of projector screens and projector lifts.
 I use a cheap USB RS-485 controller from eBay to talk to the projector screen where position 5 of the RJ25
 connector is connected to D+ and position 6 to the D-.
 
+![image](usb-rs485.png)
+
 See the documentation of your specific device on how to wire yours correctly.
 
 ## Protocol
