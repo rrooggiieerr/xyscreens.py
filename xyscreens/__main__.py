@@ -5,12 +5,53 @@ Created on 18 Nov 2022
 """
 
 import argparse
+import asyncio
 import logging
-import time
 
-from xyscreens import XYScreens
+from xyscreens import XYScreens, XYScreensState
 
 _LOGGER = logging.getLogger(__name__)
+
+
+async def main(port: str, wait: int, action: str):
+    "The main function."
+    try:
+        if action == "up":
+            screen = XYScreens(port, time_up=wait, position=100.0)
+            if await screen.async_up():
+                while True:
+                    state: int = screen.state()
+                    position: float = screen.position()
+                    if _LOGGER.level <= logging.DEBUG:
+                        print(f"{state!s:8}: {position:5.1f} %", end="\r")
+                    else:
+                        _LOGGER.info("%-8s: %5.1f %%", state, position)
+                    if state == XYScreensState.UP:
+                        if _LOGGER.level <= logging.DEBUG:
+                            print()
+                        break
+                    await asyncio.sleep(0.1)
+        elif action == "stop":
+            screen = XYScreens(port)
+            await screen.async_stop()
+        elif action == "down":
+            screen = XYScreens(port, time_down=wait, position=0.0)
+            if await screen.async_down():
+                while True:
+                    state: int = screen.state()
+                    position: float = screen.position()
+                    if _LOGGER.level <= logging.DEBUG:
+                        print(f"{state!s:8}: {position:5.1f} %", end="\r")
+                    else:
+                        _LOGGER.info("%-8s: %5.1f %%", state, position)
+                    if state == XYScreensState.DOWN:
+                        if _LOGGER.level <= logging.DEBUG:
+                            print()
+                        break
+                    await asyncio.sleep(0.1)
+    except KeyboardInterrupt:
+        # Handle keyboard interrupt
+        pass
 
 
 if __name__ == "__main__":
@@ -31,39 +72,7 @@ if __name__ == "__main__":
         logging.basicConfig(format="%(message)s", level=logging.INFO)
 
     try:
-        if args.action == "up":
-            screen = XYScreens(args.port, time_up=args.wait, position=100.0)
-            if screen.up():
-                while True:
-                    state: int = screen.state()
-                    position: float = screen.position()
-                    if not args.debugLogging:
-                        print(f"{screen.STATES[state]:8}: {position:5.1f} %", end="\r")
-                    else:
-                        _LOGGER.info("%s: %5.1f %%", screen.STATES[state], position)
-                    if state == screen.STATE_UP:
-                        if not args.debugLogging:
-                            print()
-                        break
-                    time.sleep(0.1)
-        elif args.action == "stop":
-            screen = XYScreens(args.port)
-            screen.stop()
-        elif args.action == "down":
-            screen = XYScreens(args.port, time_down=args.wait, position=0.0)
-            if screen.down():
-                while True:
-                    state: int = screen.state()
-                    position: float = screen.position()
-                    if not args.debugLogging:
-                        print(f"{screen.STATES[state]:8}: {position:5.1f} %", end="\r")
-                    else:
-                        _LOGGER.info("%s: %5.1f %%", screen.STATES[state], position)
-                    if state == screen.STATE_DOWN:
-                        if not args.debugLogging:
-                            print()
-                        break
-                    time.sleep(0.1)
-    except KeyboardInterrupt:
-        # Handle keyboard interrupt
-        pass
+        loop = asyncio.new_event_loop()
+        loop.run_until_complete(main(args.port, args.wait, args.action))
+    finally:
+        loop.close()
