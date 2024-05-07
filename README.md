@@ -2,7 +2,8 @@
 
 ![Python][python-shield]
 [![GitHub Release][releases-shield]][releases]
-[![Licence][license-badge]][license]  
+[![Licence][license-shield]][license]
+[![Maintainer][maintainer-shield]][maintainer]  
 [![Github Sponsors][github-shield]][github]
 [![PayPal][paypal-shield]][paypal]
 [![BuyMeCoffee][buymecoffee-shield]][buymecoffee]
@@ -33,9 +34,9 @@ See the documentation of your specific device on how to wire yours correctly.
 If your devices follows the following protocol it's supported by this Python library:
 
 2400 baud 8N1  
-Up command  : 0xFFAAEEEEDD  
-Down command: 0xFFAAEEEEEE  
-Stop command: 0xFFAAEEEECC
+Up command  : 0xFF 0xAA 0xEE 0xEE 0xDD  
+Down command: 0xFF 0xAA 0xEE 0xEE 0xEE  
+Stop command: 0xFF 0xAA 0xEE 0xEE 0xCC
 
 ## Supported projector screens and lifts
 
@@ -80,12 +81,17 @@ You can add the `--debug` flag to any CLI command to get a more details on what'
 ## Support my work
 
 Do you enjoy using this Python library? Then consider supporting my work using one of the following
-platforms:
+platforms, your donation is greatly appreciated and keeps me motivated:
 
 [![Github Sponsors][github-shield]][github]
 [![PayPal][paypal-shield]][paypal]
 [![BuyMeCoffee][buymecoffee-shield]][buymecoffee]
 [![Patreon][patreon-shield]][patreon]
+
+## Hire me
+
+If you're in need for a freelance Python developer for your project please contact me, you can find
+my email address on [my GitHub profile](https://github.com/rrooggiieerr).
 
 ---
 
@@ -93,7 +99,9 @@ platforms:
 [releases]: https://github.com/rrooggiieerr/xyscreens.py/releases
 [releases-shield]: https://img.shields.io/github/v/release/rrooggiieerr/xyscreens.py?style=for-the-badge
 [license]: ./LICENSE
-[license-badge]: https://img.shields.io/github/license/rrooggiieerr/xyscreens.py?style=for-the-badge
+[license-shield]: https://img.shields.io/github/license/rrooggiieerr/xyscreens.py?style=for-the-badge
+[maintainer]: https://github.com/rrooggiieerr
+[maintainer-shield]: https://img.shields.io/badge/MAINTAINER-%40rrooggiieerr-41BDF5?style=for-the-badge
 [paypal]: https://paypal.me/seekingtheedge
 [paypal-shield]: https://img.shields.io/badge/PayPal-00457C?style=for-the-badge&logo=paypal&logoColor=white
 [buymecoffee]: https://www.buymeacoffee.com/rrooggiieerr
