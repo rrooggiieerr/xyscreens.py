@@ -99,7 +99,7 @@ class XYScreens:
             self._time_up = time_down
 
         # Set the initial position of the screen.
-        self.set_position(position)
+        self.restore_position(position)
 
     def restore_position(self, position: float) -> None:
         """
