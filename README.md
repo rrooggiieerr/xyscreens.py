@@ -11,14 +11,17 @@
 
 ## Introduction
 
-This python library lets you control XY Screens projector screens and lifts over the RS-485 interface.
+This python library lets you control XY Screens projector screens and lifts over the RS-485
+interface.
 
-XY Screens is an OEM manufacturer of projector screens and lifts, their devices are sold around the world under various brand names.
+XY Screens is an OEM manufacturer of projector screens and lifts, their devices are sold around the
+world under various brand names.
 
 ## Features
 
-- Synchronous and asynchronous methods
 - Calculates screen position
+- Synchronous and asynchronous methods
+- Uses Callbacks for asynchronous methods
 
 ## Hardware
 
@@ -44,7 +47,8 @@ The following projector screens is known to work:
 
 * iVisions Electro M Series
 
-The following projector screens and lifts are not tested but use the same protocol according to the documentation:
+The following projector screens and lifts are not tested but use the same protocol according to the
+documentation:
 
 * iVisions Electro L/XL/Pro/HD Series
 * iVisions PL Series projector lift
@@ -63,20 +67,21 @@ You can install the Python XY Screens library using the Python package manager P
 
 ## `xyscreens` CLI
 
-You can use the Python XY Screens library directly from the command line to move your screen up or down or to stop the screen using the following syntax:
+You can use the Python XY Screens library directly from the command line to move your screen up or
+down or to stop the screen using the following syntax:
 
-Move the screen down: `python3 -m xyscreens <serial port> down`  
-Stop the screen: `python3 -m xyscreens <serial port> stop`  
-Move the screen up: `python3 -m xyscreens <serial port> up`
+Move the screen down: `python3 -m xyscreens <serial port> <time> down`  
+Stop the screen: `python3 -m xyscreens <serial port> <time> stop`  
+Move the screen up: `python3 -m xyscreens <serial port> <time> up`
 
-If you add the arguments `--wait <time>` to the down and up commands where `<time>` is the time in seconds to move the screen down, respectively up, the
-process will wait till the screen is down/up and show the progress.
+Where `<time>` is the time in seconds to move the screen down, respectively up. The process will
+wait till the screen is down/up and show the progress.
 
 ### Troubleshooting
 
 You can add the `--debug` flag to any CLI command to get a more details on what's going on. Like so:
 
-`python3 -m xyscreens <serial port> down --debug`
+`python3 -m xyscreens <serial port> <time> down --debug`
 
 ## Support my work
 

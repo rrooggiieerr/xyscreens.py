@@ -7,9 +7,11 @@ Created on 17 Nov 2022
 @author: Rogier van Staveren
 """
 
+import asyncio
 import logging
 import time
 from enum import IntEnum, StrEnum
+from typing import Any, Tuple
 
 import serial
 import serial_asyncio
@@ -71,6 +73,11 @@ class XYScreens:
     # Timestamp when the up or down command has been executed.
     _timestamp: float
 
+    # List of callbacks which need to be called when the screen status changes.
+    _callbacks: list[Any] | None = None
+    # The task that handles the set position functionality in async mode.
+    _set_position_task: asyncio.Task | None = None
+
     def __init__(
         self,
         serial_port: str,  # The serial port where the RS-485 interface and screen is connected to.
@@ -123,6 +130,16 @@ class XYScreens:
         # If screen position is anywhere in between 0.0% and 100.0% the state is Stopped
         else:
             self._state = XYScreensState.STOPPED
+
+    def add_callback(self, callback):
+        """
+        Adds an Event Occurred Callback to the UNii.
+        """
+
+        if self._callbacks is None:
+            self._callbacks = []
+
+        self._callbacks.append(callback)
 
     def _send_command(self, command: bytes) -> bool:
         try:
@@ -179,10 +196,6 @@ class XYScreens:
         logger.debug("Device %s connected", self._serial_port)
 
         try:
-            # # Open the connection.
-            # if not writer.is_open:
-            #     writer.open()
-
             # Send the command.
             writer.write(command)
             await writer.drain()
@@ -190,30 +203,48 @@ class XYScreens:
 
             # Close the connection.
             writer.close()
+
+            return True
         except serial.SerialException as ex:
             logger.exception("Error while writing device %s: %s", self._serial_port, ex)
-        else:
-            return True
 
         return False
 
-    def _update(self) -> None:
-        "Calculates the position of the screen based on the direction the screen is moving."
+    def update_status(self) -> Tuple[XYScreensState, float]:
+        """
+        Calculates and returns the status and position of the screen based on the direction the
+        screen is moving.
+        """
         if self._state == XYScreensState.DOWNWARD:
-            self._position = ((time.time() - self._timestamp) / self._time_down) * 100.0
-            if self._position >= 100.0:
+            position = ((time.time() - self._timestamp) / self._time_down) * 100.0
+            if position >= 100.0:
                 self._state = XYScreensState.DOWN
-                self._position = 100.0
+                position = 100.0
+            self._position = position
         elif self._state == XYScreensState.UPWARD:
-            self._position = ((time.time() - self._timestamp) / self._time_up) * 100.0
-            self._position = 100 - self._position
-            if self._position <= 0.0:
+            position = ((time.time() - self._timestamp) / self._time_up) * 100.0
+            position = 100 - position
+            if position <= 0.0:
                 self._state = XYScreensState.UP
-                self._position = 0.0
+                position = 0.0
+            self._position = position
+
+        return (self._state, self._position)
+
+    def _update_callbacks(self):
+        if self._callbacks is None:
+            return
+
+        for callback in self._callbacks:
+            try:
+                callback(self._state, self._position)
+            # pylint: disable=broad-exception-caught
+            except Exception as ex:
+                logger.error("Exception in callback: %s", ex)
 
     def _post_up(self) -> bool:
         if self._state is XYScreensState.DOWNWARD:
-            self._update()
+            self.update_status()
 
         if self._state not in (XYScreensState.UPWARD, XYScreensState.UP):
             self._timestamp = time.time() - (
@@ -229,7 +260,6 @@ class XYScreens:
     # pylint: disable=C0103
     def up(self) -> bool:
         "Move the screen up."
-        logger.debug("up()")
 
         if self._send_command(XYScreensCommand.UP.to_bytes()):
             return self._post_up()
@@ -238,12 +268,8 @@ class XYScreens:
 
     async def async_up(self) -> bool:
         "Move the screen up."
-        logger.debug("async_up()")
 
-        if await self._async_send_command(XYScreensCommand.UP.to_bytes()):
-            return self._post_up()
-
-        return False
+        return await self.async_set_position(0.0)
 
     def _post_stop(self) -> bool:
         if self._state not in (
@@ -251,7 +277,7 @@ class XYScreens:
             XYScreensState.DOWN,
             XYScreensState.STOPPED,
         ):
-            self._update()
+            self.update_status()
             if self._state not in (XYScreensState.UP, XYScreensState.DOWN):
                 self._state = XYScreensState.STOPPED
             return True
@@ -260,7 +286,6 @@ class XYScreens:
 
     def stop(self) -> bool:
         "Stop the screen."
-        logger.debug("stop()")
 
         if self._send_command(XYScreensCommand.STOP.to_bytes()):
             return self._post_stop()
@@ -269,16 +294,19 @@ class XYScreens:
 
     async def async_stop(self) -> bool:
         "Stop the screen."
-        logger.debug("async_stop()")
 
-        if await self._async_send_command(XYScreensCommand.STOP.to_bytes()):
-            return self._post_stop()
+        if (
+            await self._async_send_command(XYScreensCommand.STOP.to_bytes())
+            and self._post_stop()
+        ):
+            self._update_callbacks()
+            return True
 
         return False
 
     def _post_down(self) -> bool:
         if self._state is XYScreensState.UPWARD:
-            self._update()
+            self.update_status()
 
         if self._state not in (XYScreensState.DOWNWARD, XYScreensState.DOWN):
             self._timestamp = time.time() - (self._position * (self._time_down / 100))
@@ -291,7 +319,6 @@ class XYScreens:
 
     def down(self) -> bool:
         "Move the screen down."
-        logger.debug("down()")
 
         if self._send_command(XYScreensCommand.DOWN.to_bytes()):
             return self._post_down()
@@ -300,23 +327,99 @@ class XYScreens:
 
     async def async_down(self) -> bool:
         "Move the screen down."
-        logger.debug("async_down()")
 
-        if await self._async_send_command(XYScreensCommand.DOWN.to_bytes()):
-            return self._post_down()
+        return await self.async_set_position(100.0)
 
+    def _target_position_reached(self, target_position: float) -> bool:
+        """Calculates if the target position has been reached."""
+        self.update_status()
+        self._update_callbacks()
+
+        if self._state == XYScreensState.DOWNWARD and self._position >= target_position:
+            return True
+        if self._state == XYScreensState.UPWARD and self._position <= target_position:
+            return True
+        if self._state not in (
+            XYScreensState.UPWARD,
+            XYScreensState.DOWNWARD,
+        ):
+            return True
+
+        # Target position is not yet reached
         return False
+
+    def set_position(self, target_position: float) -> bool:
+        """Initiates the screen to move to a given position."""
+        assert 0.0 <= target_position <= 100.0
+
+        if round(self._position) == round(target_position):
+            return self.stop()
+
+        if self._position < target_position and not self.down():
+            return False
+        if self._position > target_position and not self.up():
+            return False
+
+        sleep_time = min(self._time_up, self._time_down) / 1000.0
+        while True:
+            if self._target_position_reached(target_position):
+                if self._state in (XYScreensState.UPWARD, XYScreensState.DOWNWARD):
+                    self.stop()
+                break
+
+            time.sleep(sleep_time)
+
+        return True
+
+    async def async_set_position(self, target_position: float) -> bool:
+        """Initiates the screen to move to a given position."""
+        assert 0.0 <= target_position <= 100.0
+
+        if self._set_position_task is not None and not self._set_position_task.done():
+            if not self._set_position_task.cancel():
+                logger.error("Failed to cancel previous set position task")
+                return False
+            logger.debug("Canceled previous set position task")
+
+        if round(self._position) == round(target_position):
+            return await self.async_stop()
+
+        if self._position < target_position:
+            await self._async_send_command(XYScreensCommand.DOWN.to_bytes())
+            self._post_down()
+        elif self._position > target_position:
+            await self._async_send_command(XYScreensCommand.UP.to_bytes())
+            self._post_up()
+
+        self._set_position_task = asyncio.create_task(
+            self._set_position_coroutine(target_position)
+        )
+
+        return True
+
+    async def _set_position_coroutine(self, target_position: float):
+        sleep_time = min(self._time_up, self._time_down) / 1000.0
+        while True:
+            self._update_callbacks()
+
+            if self._target_position_reached(target_position):
+                if self._state in (XYScreensState.UPWARD, XYScreensState.DOWNWARD):
+                    await self._async_send_command(XYScreensCommand.STOP.to_bytes())
+                    self._post_stop()
+                break
+
+            await asyncio.sleep(sleep_time)
 
     def state(self) -> XYScreensState:
         "Returns the current state of the screen."
-        self._update()
+        (state, _) = self.update_status()
 
-        return self._state
+        return state
 
     def position(self) -> float:
         """
         Returns the current position of the screen where 0.0 is totally up and 100.0 is fully down.
         """
-        self._update()
+        (_, position) = self.update_status()
 
-        return self._position
+        return position

@@ -13,42 +13,45 @@ from xyscreens import XYScreens, XYScreensState
 _LOGGER = logging.getLogger(__name__)
 
 
+def _print_status(state: XYScreensState, position: float):
+    if _LOGGER.isEnabledFor(logging.DEBUG):
+        _LOGGER.info("%-8s: %5.1f %%", state, position)
+    else:
+        print(f"{state!s:8}: {position:5.1f} %", end="\r")
+
+
 async def main(port: str, wait: int, action: str):
     "The main function."
     try:
         if action == "up":
-            screen = XYScreens(port, time_up=wait, position=100.0)
-            if await screen.async_up():
-                while True:
-                    state = screen.state()
-                    position = screen.position()
+            screen = XYScreens(port, wait, position=100.0)
+            if not await screen.async_up():
+                return
+
+            while True:
+                (state, position) = screen.update_status()
+                _print_status(state, position)
+                if state == XYScreensState.UP:
                     if _LOGGER.level <= logging.DEBUG:
-                        print(f"{state!s:8}: {position:5.1f} %", end="\r")
-                    else:
-                        _LOGGER.info("%-8s: %5.1f %%", state, position)
-                    if state == XYScreensState.UP:
-                        if _LOGGER.level <= logging.DEBUG:
-                            print()
-                        break
-                    await asyncio.sleep(0.1)
+                        print()
+                    break
+                await asyncio.sleep(0.1)
         elif action == "stop":
-            screen = XYScreens(port)
+            screen = XYScreens(port, wait)
             await screen.async_stop()
         elif action == "down":
-            screen = XYScreens(port, time_down=wait, position=0.0)
-            if await screen.async_down():
-                while True:
-                    state = screen.state()
-                    position = screen.position()
+            screen = XYScreens(port, wait, position=0.0)
+            if not await screen.async_down():
+                return
+
+            while True:
+                (state, position) = screen.update_status()
+                _print_status(state, position)
+                if state == XYScreensState.DOWN:
                     if _LOGGER.level <= logging.DEBUG:
-                        print(f"{state!s:8}: {position:5.1f} %", end="\r")
-                    else:
-                        _LOGGER.info("%-8s: %5.1f %%", state, position)
-                    if state == XYScreensState.DOWN:
-                        if _LOGGER.level <= logging.DEBUG:
-                            print()
-                        break
-                    await asyncio.sleep(0.1)
+                        print()
+                    break
+                await asyncio.sleep(0.1)
     except KeyboardInterrupt:
         # Handle keyboard interrupt
         pass
@@ -58,8 +61,8 @@ if __name__ == "__main__":
     # Read command line arguments
     argparser = argparse.ArgumentParser()
     argparser.add_argument("port")
+    argparser.add_argument("wait", type=int)
     argparser.add_argument("action", choices=["up", "stop", "down"])
-    argparser.add_argument("--wait", dest="wait", type=int)
     argparser.add_argument("--debug", dest="debugLogging", action="store_true")
 
     args = argparser.parse_args()
