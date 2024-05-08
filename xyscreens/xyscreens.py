@@ -101,11 +101,10 @@ class XYScreens:
         # Set the initial position of the screen.
         self.set_position(position)
 
-    def set_position(self, position: float) -> None:
+    def restore_position(self, position: float) -> None:
         """
-        Sets the initial position of the screen, just like in the constructor.
-
-        Mainly introduced to restore the screen state in Home Assistant.
+        Restores the position of the screen, mainly introduced to restore the screen state in Home
+        Assistant.
 
         Not to be used to move the screen to a position
         """
