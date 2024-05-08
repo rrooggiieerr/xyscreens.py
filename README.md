@@ -19,9 +19,9 @@ world under various brand names.
 
 ## Features
 
-- Calculates screen position
-- Synchronous and asynchronous methods
-- Uses Callbacks for asynchronous methods
+* Calculates screen position
+* Synchronous and asynchronous methods
+* Uses Callbacks for asynchronous methods
 
 ## Hardware
 
