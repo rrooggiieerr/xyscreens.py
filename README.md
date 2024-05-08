@@ -28,7 +28,7 @@ world under various brand names.
 I use a cheap USB RS-485 controller to talk to the projector screen where position 5 of the RJ25
 connector is connected to D+ and position 6 to the D-.
 
-![image](usb-rs485.png)
+![image](https://raw.githubusercontent.com/rrooggiieerr/xyscreens.py/main/usb-rs485.png)
 
 See the documentation of your specific device on how to wire yours correctly.
 
