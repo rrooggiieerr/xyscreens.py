@@ -60,9 +60,9 @@ class XYScreens:
     # The serial port where the RS-485 interface and screen is connected to.
     _serial_port: str | None = None
     # Time in seconds for the screen to go up.
-    _time_up: float | None = None
+    _time_up: float
     # Time in seconds for the screen to go down.
-    _time_down: float | None = None
+    _time_down: float
 
     # Current state of the screen. Defaults to Up when object is created.
     _state: XYScreensState = XYScreensState.UP
@@ -199,12 +199,12 @@ class XYScreens:
 
     def _update(self) -> None:
         "Calculates the position of the screen based on the direction the screen is moving."
-        if self._state == XYScreensState.DOWNWARD and self._time_down is not None:
+        if self._state == XYScreensState.DOWNWARD:
             self._position = ((time.time() - self._timestamp) / self._time_down) * 100.0
             if self._position >= 100.0:
                 self._state = XYScreensState.DOWN
                 self._position = 100.0
-        elif self._state == XYScreensState.UPWARD and self._time_up is not None:
+        elif self._state == XYScreensState.UPWARD:
             self._position = ((time.time() - self._timestamp) / self._time_up) * 100.0
             self._position = 100 - self._position
             if self._position <= 0.0:
@@ -215,10 +215,7 @@ class XYScreens:
         if self._state is XYScreensState.DOWNWARD:
             self._update()
 
-        if (
-            self._state not in (XYScreensState.UPWARD, XYScreensState.UP)
-            and self._time_up is not None
-        ):
+        if self._state not in (XYScreensState.UPWARD, XYScreensState.UP):
             self._timestamp = time.time() - (
                 (100.0 - self._position) * (self._time_up / 100)
             )
@@ -283,10 +280,7 @@ class XYScreens:
         if self._state is XYScreensState.UPWARD:
             self._update()
 
-        if (
-            self._state not in (XYScreensState.DOWNWARD, XYScreensState.DOWN)
-            and self._time_down is not None
-        ):
+        if self._state not in (XYScreensState.DOWNWARD, XYScreensState.DOWN):
             self._timestamp = time.time() - (self._position * (self._time_down / 100))
             logger.debug("down() time stamp: %s", self._timestamp)
             logger.debug("down() position: %s", self._position)
