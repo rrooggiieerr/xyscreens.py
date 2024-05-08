@@ -74,7 +74,7 @@ class XYScreens:
     def __init__(
         self,
         serial_port: str,  # The serial port where the RS-485 interface and screen is connected to.
-        time_down: float | None = None,  # Time in seconds for the screen to go down.
+        time_down: float,  # Time in seconds for the screen to go down.
         time_up: float | None = None,  # Time in seconds for the screen to go up.
         position: float = 0.0,  # Position of the screen where 0.0 is totally up and 100.0 is
         # fully down.
@@ -82,20 +82,19 @@ class XYScreens:
         "Initialises the XYScreens object."
         # Validate the different arguments.
         assert serial_port is not None
-        assert time_down is None or time_down > 0.0
+        assert time_down > 0.0
         assert time_up is None or time_up > 0.0
 
         self._serial_port = serial_port
         # Set the time for the screen to go down.
-        if time_down is not None:
-            self._time_down = time_down
+        self._time_down = time_down
 
         # Set the time for the screen to go up.
         if time_up is not None:
             self._time_up = time_up
         # If no time for the screen to go up is given use the same value as the time for the screen
         # to go down.
-        elif time_down is not None:
+        else:
             self._time_up = time_down
 
         # Set the initial position of the screen.
