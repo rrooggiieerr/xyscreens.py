@@ -70,18 +70,18 @@ You can install the Python XY Screens library using the Python package manager P
 You can use the Python XY Screens library directly from the command line to move your screen up or
 down or to stop the screen using the following syntax:
 
-Move the screen down: `python3 -m xyscreens <serial port> <time> down`  
-Stop the screen: `python3 -m xyscreens <serial port> <time> stop`  
-Move the screen up: `python3 -m xyscreens <serial port> <time> up`
+Move the screen down: `python3 -m xyscreens <serial port> <duration> down`  
+Stop the screen: `python3 -m xyscreens <serial port> <duration> stop`  
+Move the screen up: `python3 -m xyscreens <serial port> <duration> up`
 
-Where `<time>` is the time in seconds to move the screen down, respectively up. The process will
-wait till the screen is down/up and show the progress.
+Where `<duration>` is the time in seconds to move the screen up or down. The process will wait till
+the screen is up or down and show the progress.
 
 ### Troubleshooting
 
 You can add the `--debug` flag to any CLI command to get a more details on what's going on. Like so:
 
-`python3 -m xyscreens <serial port> <time> down --debug`
+`python3 -m xyscreens <serial port> <duration> down --debug`
 
 ## Support my work
 

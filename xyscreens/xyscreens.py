@@ -61,10 +61,10 @@ class XYScreens:
 
     # The serial port where the RS-485 interface and screen is connected to.
     _serial_port: str | None = None
-    # Time in seconds for the screen to go up.
-    _time_up: float
-    # Time in seconds for the screen to go down.
-    _time_down: float
+    # The amount of time in seconds it takes the cover to close from the fully-open state.
+    _close_duration: float
+    # The amount of time in seconds it takes the screen to open up from the fully-closed state.
+    _open_duration: float
 
     # Current state of the screen. Defaults to Up when object is created.
     _state: XYScreensState = XYScreensState.UP
@@ -81,28 +81,30 @@ class XYScreens:
     def __init__(
         self,
         serial_port: str,  # The serial port where the RS-485 interface and screen is connected to.
-        time_down: float,  # Time in seconds for the screen to go down.
-        time_up: float | None = None,  # Time in seconds for the screen to go up.
+        open_duration: float,  # Duration in seconds for the screen to go down.
+        close_duration: (
+            float | None
+        ) = None,  # Duration in seconds for the screen to go up.
         position: float = 0.0,  # Position of the screen where 0.0 is totally up and 100.0 is
         # fully down.
     ):
         "Initialises the XYScreens object."
         # Validate the different arguments.
         assert serial_port is not None
-        assert time_down > 0.0
-        assert time_up is None or time_up > 0.0
+        assert open_duration > 0.0
+        assert close_duration is None or close_duration > 0.0
 
         self._serial_port = serial_port
-        # Set the time for the screen to go down.
-        self._time_down = time_down
+        # Set the duration for the screen to go down.
+        self._open_duration = open_duration
 
-        # Set the time for the screen to go up.
-        if time_up is not None:
-            self._time_up = time_up
-        # If no time for the screen to go up is given use the same value as the time for the screen
-        # to go down.
+        # Set the duration for the screen to go up.
+        if close_duration is not None:
+            self._close_duration = close_duration
+        # If no duration for the screen to go up is given use the same value as the duration for
+        # the screen to go down.
         else:
-            self._time_up = time_down
+            self._close_duration = open_duration
 
         # Set the initial position of the screen.
         self.restore_position(position)
@@ -216,13 +218,13 @@ class XYScreens:
         screen is moving.
         """
         if self._state == XYScreensState.DOWNWARD:
-            position = ((time.time() - self._timestamp) / self._time_down) * 100.0
+            position = ((time.time() - self._timestamp) / self._open_duration) * 100.0
             if position >= 100.0:
                 self._state = XYScreensState.DOWN
                 position = 100.0
             self._position = position
         elif self._state == XYScreensState.UPWARD:
-            position = ((time.time() - self._timestamp) / self._time_up) * 100.0
+            position = ((time.time() - self._timestamp) / self._close_duration) * 100.0
             position = 100 - position
             if position <= 0.0:
                 self._state = XYScreensState.UP
@@ -248,7 +250,7 @@ class XYScreens:
 
         if self._state not in (XYScreensState.UPWARD, XYScreensState.UP):
             self._timestamp = time.time() - (
-                (100.0 - self._position) * (self._time_up / 100)
+                (100.0 - self._position) * (self._close_duration / 100)
             )
             logger.debug("up() time stamp: %s", self._timestamp)
             logger.debug("up() position: %s", self._position)
@@ -309,7 +311,9 @@ class XYScreens:
             self.update_status()
 
         if self._state not in (XYScreensState.DOWNWARD, XYScreensState.DOWN):
-            self._timestamp = time.time() - (self._position * (self._time_down / 100))
+            self._timestamp = time.time() - (
+                self._position * (self._open_duration / 100)
+            )
             logger.debug("down() time stamp: %s", self._timestamp)
             logger.debug("down() position: %s", self._position)
             self._state = XYScreensState.DOWNWARD
@@ -360,14 +364,14 @@ class XYScreens:
         if self._position > target_position and not self.up():
             return False
 
-        sleep_time = min(self._time_up, self._time_down) / 1000.0
+        sleep_duration = min(self._close_duration, self._open_duration) / 1000.0
         while True:
             if self._target_position_reached(target_position):
                 if self._state in (XYScreensState.UPWARD, XYScreensState.DOWNWARD):
                     self.stop()
                 break
 
-            time.sleep(sleep_time)
+            time.sleep(sleep_duration)
 
         return True
 
@@ -398,7 +402,7 @@ class XYScreens:
         return True
 
     async def _set_position_coroutine(self, target_position: float):
-        sleep_time = min(self._time_up, self._time_down) / 1000.0
+        sleep_duration = min(self._close_duration, self._open_duration) / 1000.0
         while True:
             self._update_callbacks()
 
@@ -408,7 +412,7 @@ class XYScreens:
                     self._post_stop()
                 break
 
-            await asyncio.sleep(sleep_time)
+            await asyncio.sleep(sleep_duration)
 
     def state(self) -> XYScreensState:
         "Returns the current state of the screen."
