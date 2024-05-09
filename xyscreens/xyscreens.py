@@ -339,18 +339,13 @@ class XYScreens:
         self.update_status()
         self._update_callbacks()
 
-        if self._state == XYScreensState.DOWNWARD and self._position >= target_position:
-            return True
-        if self._state == XYScreensState.UPWARD and self._position <= target_position:
-            return True
-        if self._state not in (
-            XYScreensState.UPWARD,
-            XYScreensState.DOWNWARD,
-        ):
-            return True
+        if self._state == XYScreensState.DOWNWARD:
+            return self._position >= target_position
+        if self._state == XYScreensState.UPWARD:
+            return self._position <= target_position
 
-        # Target position is not yet reached
-        return False
+        # Target position has been reached
+        return True
 
     def set_position(self, target_position: float) -> bool:
         """Initiates the screen to move to a given position."""
