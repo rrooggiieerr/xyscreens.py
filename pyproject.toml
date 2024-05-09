@@ -3,10 +3,10 @@ requires = ["hatchling>=1.24", "hatch-vcs"]
 build-backend = "hatchling.build"
 
 [tool.hatch.build.hooks.vcs]
-version-file = "_version.py"
+version-file = "xyscreens/_version.py"
 
 [tool.hatch.version]
-path = "xyscreens/_version.py"
+source = "vcs"
 
 [project]
 name = "xyscreens"
