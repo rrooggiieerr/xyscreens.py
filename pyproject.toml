@@ -5,6 +5,9 @@ build-backend = "hatchling.build"
 [tool.hatch.build.hooks.vcs]
 version-file = "_version.py"
 
+[tool.hatch.version]
+path = "xyscreens/_version.py"
+
 [project]
 name = "xyscreens"
 dynamic = ["version"]
