@@ -38,18 +38,22 @@ dependencies = [
 Homepage = "https://github.com/rrooggiieerr/xyscreens.py"
 Issues = "https://github.com/rrooggiieerr/xyscreens.py/issues"
 
-[tool.black]
-target-version = ["py311", "py312"]
-exclude = 'generated'
-
 [tool.isort]
 # https://github.com/PyCQA/isort/wiki/isort-Settings
 profile = "black"
+skip = "xyscreens/_version.py"
+
+[tool.black]
+exclude = "xyscreens/_version.py"
+
+[tool.pylint]
+ignore = "_version.py"
+recursive = "y"
 
 [tool.mypy]
 python_version = "3.11"
 mypy_path = "xyscreens"
 
 [[tool.mypy.overrides]]
-module = ["serial.*", "serial_asyncio.*"]
+module = ["serial.*", "serial_asyncio.*", "*._version"]
 ignore_missing_imports = true
