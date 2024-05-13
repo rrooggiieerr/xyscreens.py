@@ -6,5 +6,8 @@ Created on 17 Nov 2022
 @author: Rogier van Staveren
 """
 
-from ._version import __version__
+try:
+    from ._version import __version__
+except ModuleNotFoundError:
+    pass
 from .xyscreens import XYScreens, XYScreensConnectionError, XYScreensState
