@@ -19,6 +19,14 @@ import serial_asyncio
 logger = logging.getLogger(__name__)
 
 
+class XYScreensConnectionError(Exception):
+    """
+    XY Screens Connection Error.
+
+    When an error occurs while connecting to the projector screen or lift.
+    """
+
+
 class XYScreensCommand(StrEnum):
     "The commands needed to move and stop the screen"
 
@@ -155,10 +163,9 @@ class XYScreens:
                 timeout=1,
             )
         except serial.SerialException as ex:
-            logger.exception(
-                "Unable to connect to the device %s: %s", self._serial_port, ex
-            )
-            return False
+            raise XYScreensConnectionError(
+                f"Unable to connect to device {self._serial_port}"
+            ) from ex
         logger.debug("Device %s connected", self._serial_port)
 
         try:
@@ -173,10 +180,12 @@ class XYScreens:
 
             # Close the connection.
             connection.close()
-        except serial.SerialException as ex:
-            logger.exception("Error while writing device %s: %s", self._serial_port, ex)
-        else:
+
             return True
+        except serial.SerialException as ex:
+            raise XYScreensConnectionError(
+                f"Error while writing to device {self._serial_port}"
+            ) from ex
 
         return False
 
@@ -191,10 +200,9 @@ class XYScreens:
                 timeout=1,
             )
         except serial.SerialException as ex:
-            logger.exception(
-                "Unable to connect to the device %s: %s", self._serial_port, ex
-            )
-            return False
+            raise XYScreensConnectionError(
+                f"Unable to connect to device {self._serial_port}"
+            ) from ex
         logger.debug("Device %s connected", self._serial_port)
 
         try:
@@ -208,7 +216,9 @@ class XYScreens:
 
             return True
         except serial.SerialException as ex:
-            logger.exception("Error while writing device %s: %s", self._serial_port, ex)
+            raise XYScreensConnectionError(
+                f"Error while writing to device {self._serial_port}"
+            ) from ex
 
         return False
 
@@ -384,10 +394,12 @@ class XYScreens:
             return await self.async_stop()
 
         if self._position < target_position:
-            await self._async_send_command(XYScreensCommand.DOWN.to_bytes())
+            if not await self._async_send_command(XYScreensCommand.DOWN.to_bytes()):
+                return False
             self._post_down()
         elif self._position > target_position:
-            await self._async_send_command(XYScreensCommand.UP.to_bytes())
+            if not await self._async_send_command(XYScreensCommand.UP.to_bytes()):
+                return False
             self._post_up()
 
         self._set_position_task = asyncio.create_task(
