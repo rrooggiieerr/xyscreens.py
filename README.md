@@ -19,9 +19,18 @@ world under various brand names.
 
 ## Features
 
-* Calculates screen position
-* Synchronous and asynchronous methods
-* Uses Callbacks for asynchronous methods
+- Position control, move the screen/lift to any position along the way
+- Synchronous and asynchronous methods
+- Uses Callbacks for asynchronous methods
+
+### About position control
+
+The XY Screens projector screens and lifts do not provide any positional feedback. The state of the
+screen is thus always an assumed one. The screen position is calculated based on the time the cover
+has moved and the configured up and down durations. This results in a potentioal error margin.
+Every time the screen reaches it maximum up or down position the position and thus any potential
+error is reset accordingly. If the screen is controlled outside of Home Assistant, for instance
+with the remote control, the screen position and state will no longer represent the actual state.
 
 ## Hardware
 
@@ -45,16 +54,16 @@ Stop command: 0xFF 0xAA 0xEE 0xEE 0xCC
 
 The following projector screens is known to work:
 
-* iVisions Electro M Series
+- iVisions Electro M Series
 
 The following projector screens and lifts are not tested but use the same protocol according to the
 documentation:
 
-* iVisions Electro L/XL/Pro/HD Series
-* iVisions PL Series projector lift
-* Elite Screens
-* KIMEX
-* DELUXX
+- iVisions Electro L/XL/Pro/HD Series
+- iVisions PL Series projector lift
+- Elite Screens
+- KIMEX
+- DELUXX
 
 Please let me know if your projector screen or projector lift works with this Python library so I
 can improve the overview of supported projector screens and lifts.
