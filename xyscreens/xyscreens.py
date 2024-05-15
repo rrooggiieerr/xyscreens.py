@@ -178,7 +178,7 @@ class XYScreens:
             # Send the command.
             connection.write(command)
             connection.flush()
-            logger.info("Command successfully send")
+            logger.info("Command successfully sent")
 
             # Close the connection.
             connection.close()
@@ -211,7 +211,7 @@ class XYScreens:
             # Send the command.
             writer.write(command)
             await writer.drain()
-            logger.info("Command successfully send")
+            logger.info("Command successfully sent")
 
             # Close the connection.
             writer.close()
