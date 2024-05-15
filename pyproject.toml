@@ -26,7 +26,8 @@ classifiers = [
     "Operating System :: POSIX",
     "Operating System :: MacOS :: MacOS X",
     "Topic :: Software Development :: Libraries :: Python Modules",
-    "Development Status :: 4 - Beta"
+    "Development Status :: 4 - Beta",
+    "Topic :: Home Automation"
 ]
 dependencies = [
     "pyserial>=3.5",
