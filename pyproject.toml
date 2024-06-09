@@ -55,5 +55,5 @@ python_version = "3.11"
 mypy_path = "xyscreens"
 
 [[tool.mypy.overrides]]
-module = ["serial.*", "serial_asyncio.*", "*._version"]
+module = ["serial.*", "serial_asyncio_fast.*", "*._version"]
 ignore_missing_imports = true
