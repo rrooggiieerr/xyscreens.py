@@ -1,4 +1,4 @@
-# Python library to control XY Screens projector screens and lifts
+# Python library to control XY Screens and See Max projector screens and lifts
 
 ![Python][python-shield]
 [![GitHub Release][releases-shield]][releases]
@@ -11,26 +11,32 @@
 
 ## Introduction
 
-This python library lets you control XY Screens projector screens and lifts over the RS-485
-interface.
+This python library lets you control XY Screens and See Max projector screens and lifts over the
+serial and RS-485 interface.
 
-XY Screens is an OEM manufacturer of projector screens and lifts, their devices are sold around the
-world under various brand names.
+This python library was first implemented for XY Screens. After I was informed that the See Max
+devices use a very similar protocol support for these devices has been added.
+
+[XY Screens](https://www.xyscreen.com/) and See Max are OEM manufacturers of projector screens and
+lifts, their devices are sold around the world under various brand names.
 
 ## Features
 
 - Position control, move the screen/lift to any position along the way
+- Program device address on devices that support this
+- Use multiple devices on the same RS-485 interface
 - Synchronous and asynchronous methods
 - Uses Callbacks for asynchronous methods
 
 ### About position control
 
-The XY Screens projector screens and lifts do not provide any positional feedback. The state of the
-screen is thus always an assumed one. The screen position is calculated based on the time the cover
-has moved and the configured up and down durations. This results in a potentioal error margin.
-Every time the screen reaches it maximum up or down position the position and thus any potential
-error is reset accordingly. If the screen is controlled outside of Home Assistant, for instance
-with the remote control, the screen position and state will no longer represent the actual state.
+The XY Screens and See Max projector screens and lifts do not provide any positional feedback. The
+state of the screen is thus always an assumed one. The screen position is calculated based on the
+time the cover has moved and the configured up and down durations. This results in a potentioal
+error margin. Every time the screen reaches it maximum up or down position the position and thus
+any potential error is reset accordingly. If the screen is controlled outside the library, for
+instance with the remote control, the screen position and state will no longer represent the actual
+state.
 
 ## Hardware
 
@@ -46,9 +52,14 @@ See the documentation of your specific device on how to wire yours correctly.
 If your devices follows the following protocol it's supported by this Python library:
 
 2400 baud 8N1  
-Up command  : 0xFF 0xAA 0xEE 0xEE 0xDD  
-Down command: 0xFF 0xAA 0xEE 0xEE 0xEE  
-Stop command: 0xFF 0xAA 0xEE 0xEE 0xCC
+Up command  : `0xFF 0xXX 0xXX 0xXX 0xDD`  
+Down command: `0xFF 0xXX 0xXX 0xXX 0xEE`  
+Stop command: `0xFF 0xXX 0xXX 0xXX 0xCC`
+
+Where `0xXX 0xXX 0xXX` is the three byte address of the device.
+
+For XY Screens devices the default address is `0xAA 0xEE 0xEE`, while for See Max devices the default
+address is `0xEE 0xEE 0xEE`.
 
 ## Supported projector screens and lifts
 
@@ -59,11 +70,23 @@ The following projector screens is known to work:
 The following projector screens and lifts are not tested but use the same protocol according to the
 documentation:
 
+XY Screens:
 - iVisions Electro L/XL/Pro/HD Series
 - iVisions PL Series projector lift
 - Elite Screens
 - KIMEX
 - DELUXX
+- Telon
+
+See Max:
+- ScreenPro
+- Monoprice
+- Grandview
+- Dragonfly
+- WS Screens
+- Cirrus Screens
+- Lumien
+- Celexon
 
 Please let me know if your projector screen or projector lift works with this Python library so I
 can improve the overview of supported projector screens and lifts.
@@ -79,18 +102,32 @@ You can install the Python XY Screens library using the Python package manager P
 You can use the Python XY Screens library directly from the command line to move your screen up or
 down or to stop the screen using the following syntax:
 
-Move the screen down: `python3 -m xyscreens <serial port> <duration> down`  
-Stop the screen: `python3 -m xyscreens <serial port> <duration> stop`  
-Move the screen up: `python3 -m xyscreens <serial port> <duration> up`
+Move the screen down: `python3 -m xyscreens <serial port> <address> down <duration>`  
+Stop the screen: `python3 -m xyscreens <serial port> <address> stop`  
+Move the screen up: `python3 -m xyscreens <serial port> <address> up <duration>`
 
-Where `<duration>` is the time in seconds to move the screen up or down. The process will wait till
-the screen is up or down and show the progress.
+Where `<address>` is the six character hexadecimal (three bytes) address of the device. `<duration>`
+is the optional time in seconds to move the screen up or down, when given the process will wait
+till the screen is up or down and show the progress.
+
+For XY Screens devices the default address is `AAEEEE`, while for See Max devices the default
+address is `EEEEEE`. If you have reprogrammed the device address use the according address.
+
+### Programming the device address
+
+Some See Max projector screens and lifts which use the RS-485 interface seem to allow to program
+the device address. This way multiple devices can be connected to the same RS-485 interface. Each
+device should have a unique address.
+
+`python3 -m xyscreens <serial port> <address> program`  
+
+Where `<address>` is the to be programmed three byte address.
 
 ### Troubleshooting
 
 You can add the `--debug` flag to any CLI command to get a more details on what's going on. Like so:
 
-`python3 -m xyscreens <serial port> <duration> down --debug`
+`python3 -m xyscreens <serial port> <address> down <duration> --debug`
 
 ## Support my work
 
