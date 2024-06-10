@@ -20,15 +20,21 @@ def _print_status(state: XYScreensState, position: float):
         print(f"{state!s:8}: {position:5.1f} %", end="\r")
 
 
-async def main(port: str, wait: int, action: str):
+async def main(port: str, address: bytes, wait: int, action: str):
     "The main function."
+
+    if wait <= 0:
+        down_duration = 1
+    else:
+        down_duration = wait
+
     try:
         if action == "up":
-            screen = XYScreens(port, wait, position=100.0)
+            screen = XYScreens(port, address, down_duration, position=100.0)
             if not await screen.async_up():
                 return
 
-            while True:
+            while wait > 0:
                 (state, position) = screen.update_status()
                 _print_status(state, position)
                 if state == XYScreensState.UP:
@@ -36,15 +42,12 @@ async def main(port: str, wait: int, action: str):
                         print()
                     break
                 await asyncio.sleep(0.1)
-        elif action == "stop":
-            screen = XYScreens(port, wait)
-            await screen.async_stop()
         elif action == "down":
-            screen = XYScreens(port, wait, position=0.0)
+            screen = XYScreens(port, address, down_duration, position=0.0)
             if not await screen.async_down():
                 return
 
-            while True:
+            while wait > 0:
                 (state, position) = screen.update_status()
                 _print_status(state, position)
                 if state == XYScreensState.DOWN:
@@ -52,6 +55,17 @@ async def main(port: str, wait: int, action: str):
                         print()
                     break
                 await asyncio.sleep(0.1)
+        else:
+            screen = XYScreens(port, address, 1)
+            match action:
+                case "stop":
+                    await screen.async_stop()
+                case "micro_up":
+                    await screen.async_micro_up()
+                case "micro_down":
+                    await screen.async_micro_down()
+                case "program":
+                    await screen.async_program()
     except KeyboardInterrupt:
         # Handle keyboard interrupt
         pass
@@ -61,8 +75,11 @@ if __name__ == "__main__":
     # Read command line arguments
     argparser = argparse.ArgumentParser()
     argparser.add_argument("port")
-    argparser.add_argument("wait", type=int)
-    argparser.add_argument("action", choices=["up", "stop", "down"])
+    argparser.add_argument("address")
+    argparser.add_argument(
+        "action", choices=["up", "stop", "down", "micro_up", "micro_down", "program"]
+    )
+    argparser.add_argument("wait", nargs="?", type=int, default=0)
     argparser.add_argument("--debug", dest="debugLogging", action="store_true")
 
     args = argparser.parse_args()
@@ -74,8 +91,10 @@ if __name__ == "__main__":
     else:
         logging.basicConfig(format="%(message)s", level=logging.INFO)
 
+    loop = asyncio.new_event_loop()
     try:
-        loop = asyncio.new_event_loop()
-        loop.run_until_complete(main(args.port, args.wait, args.action))
+        main_task = loop.run_until_complete(
+            main(args.port, bytes.fromhex(args.address), args.wait, args.action)
+        )
     finally:
         loop.close()

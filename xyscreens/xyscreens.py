@@ -10,13 +10,24 @@ Created on 17 Nov 2022
 import asyncio
 import logging
 import time
-from enum import IntEnum, StrEnum
+from enum import IntEnum
 from typing import Any, Tuple
 
 import serial
 import serial_asyncio_fast as serial_asyncio
 
 logger = logging.getLogger(__name__)
+
+background_tasks = set()
+
+
+def _add_background_task(task: asyncio.Task) -> None:
+    # Add task to the set. This creates a strong reference.
+    background_tasks.add(task)
+
+    # To prevent keeping references to finished tasks forever, make each task remove its own
+    # reference from the set after completion:
+    task.add_done_callback(background_tasks.discard)
 
 
 class XYScreensConnectionError(Exception):
@@ -27,16 +38,43 @@ class XYScreensConnectionError(Exception):
     """
 
 
-class XYScreensCommand(StrEnum):
+class XYScreensCommands:
     "The commands needed to move and stop the screen"
 
-    UP = "FFAAEEEEDD"
-    STOP = "FFAAEEEECC"
-    DOWN = "FFAAEEEEEE"
+    _PREFIX = b"\xFF"
+    _UP = b"\xDD"
+    _STOP = b"\xCC"
+    _DOWN = b"\xEE"
+    _MICRO_UP = b"\xC9"
+    _MICRO_DOWN = b"\xE9"
+    _PROGRAM = b"\xAA"
 
-    def to_bytes(self):
-        "The command in bytes."
-        return bytes.fromhex(self.value)
+    def __init__(self, address: bytes):
+        self._address = address
+
+    def up(self) -> bytes:
+        "Returns the command needed to start moving the screen up."
+        return XYScreensCommands._PREFIX + self._address + XYScreensCommands._UP
+
+    def micro_up(self) -> bytes:
+        "Returns the command needed to move the screen up one step."
+        return XYScreensCommands._PREFIX + self._address + XYScreensCommands._MICRO_UP
+
+    def stop(self) -> bytes:
+        "Returns the command needed for stopping the screen."
+        return XYScreensCommands._PREFIX + self._address + XYScreensCommands._STOP
+
+    def down(self) -> bytes:
+        "Returns the command needed to start moving the screen down."
+        return XYScreensCommands._PREFIX + self._address + XYScreensCommands._DOWN
+
+    def micro_down(self) -> bytes:
+        "Returns the command needed to move the screen down one step."
+        return XYScreensCommands._PREFIX + self._address + XYScreensCommands._MICRO_DOWN
+
+    def program(self) -> bytes:
+        "Returns the command needed for programming the screen address."
+        return XYScreensCommands._PREFIX + self._address + XYScreensCommands._PROGRAM
 
 
 class XYScreensState(IntEnum):
@@ -89,6 +127,7 @@ class XYScreens:
     def __init__(
         self,
         serial_port: str,  # The serial port where the RS-485 interface and screen is connected to.
+        address: bytes,
         down_duration: float,  # Duration in seconds for the screen to go down.
         up_duration: (
             float | None
@@ -99,8 +138,10 @@ class XYScreens:
         "Initialises the XYScreens object."
         # Validate the different arguments.
         assert serial_port is not None
+        assert down_duration is not None
         assert down_duration > 0.0
         assert up_duration is None or up_duration > 0.0
+        assert address is not None
 
         self._serial_port = serial_port
         # Set the duration for the screen to go down.
@@ -116,6 +157,8 @@ class XYScreens:
 
         # Set the initial position of the screen.
         self.restore_position(position)
+
+        self._commands = XYScreensCommands(address)
 
     def restore_position(self, position: float) -> None:
         """
@@ -176,6 +219,7 @@ class XYScreens:
                 connection.open()
 
             # Send the command.
+            logger.debug("Sending: 0x%s", command.hex())
             connection.write(command)
             connection.flush()
             logger.info("Command successfully sent")
@@ -209,6 +253,7 @@ class XYScreens:
 
         try:
             # Send the command.
+            logger.debug("Sending: 0x%s", command.hex())
             writer.write(command)
             await writer.drain()
             logger.info("Command successfully sent")
@@ -267,6 +312,14 @@ class XYScreens:
             except Exception as ex:
                 logger.error("Exception in callback: %s", ex)
 
+    def program(self) -> bool:
+        "Program the address of the screen."
+        return self._send_command(self._commands.program())
+
+    async def async_program(self) -> bool:
+        "Program the address of the screen."
+        return await self._async_send_command(self._commands.program())
+
     def _post_up(self) -> bool:
         if self._state not in (XYScreensState.UPWARD, XYScreensState.UP):
             self.update_status()
@@ -279,7 +332,7 @@ class XYScreens:
     def up(self) -> bool:
         "Move the screen up."
 
-        if self._send_command(XYScreensCommand.UP.to_bytes()):
+        if self._send_command(self._commands.up()):
             return self._post_up()
 
         return False
@@ -288,6 +341,16 @@ class XYScreens:
         "Move the screen up."
 
         return await self.async_set_position(0.0)
+
+    def micro_up(self) -> bool:
+        "Move the screen up one step."
+
+        return self._send_command(self._commands.micro_up())
+
+    async def async_micro_up(self) -> bool:
+        "Move the screen up one step."
+
+        return await self._async_send_command(self._commands.micro_up())
 
     def _post_stop(self) -> bool:
         if self._state not in (
@@ -305,7 +368,7 @@ class XYScreens:
     def stop(self) -> bool:
         "Stop the screen."
 
-        if self._send_command(XYScreensCommand.STOP.to_bytes()):
+        if self._send_command(self._commands.stop()):
             return self._post_stop()
 
         return False
@@ -315,10 +378,7 @@ class XYScreens:
 
         await self._cancel_set_position()
 
-        if (
-            await self._async_send_command(XYScreensCommand.STOP.to_bytes())
-            and self._post_stop()
-        ):
+        if await self._async_send_command(self._commands.stop()) and self._post_stop():
             self._update_callbacks()
             return True
 
@@ -335,7 +395,7 @@ class XYScreens:
     def down(self) -> bool:
         "Move the screen down."
 
-        if self._send_command(XYScreensCommand.DOWN.to_bytes()):
+        if self._send_command(self._commands.down()):
             return self._post_down()
 
         return False
@@ -344,6 +404,16 @@ class XYScreens:
         "Move the screen down."
 
         return await self.async_set_position(100.0)
+
+    def micro_down(self) -> bool:
+        "Move the screen down one step."
+
+        return self._send_command(self._commands.micro_down())
+
+    async def async_micro_down(self) -> bool:
+        "Move the screen down one step."
+
+        return await self._async_send_command(self._commands.micro_down())
 
     def _target_position_reached(self, target_position: float) -> bool:
         """Calculates if the target position has been reached."""
@@ -390,17 +460,19 @@ class XYScreens:
         await self._cancel_set_position()
 
         if self._position < target_position:
-            if not await self._async_send_command(XYScreensCommand.DOWN.to_bytes()):
+            if not await self._async_send_command(self._commands.down()):
                 return False
             self._post_down()
         elif self._position > target_position:
-            if not await self._async_send_command(XYScreensCommand.UP.to_bytes()):
+            if not await self._async_send_command(self._commands.up()):
                 return False
             self._post_up()
 
         self._set_position_task = asyncio.create_task(
             self._set_position_coroutine(target_position)
         )
+
+        _add_background_task(self._set_position_task)
 
         return True
 
@@ -442,9 +514,7 @@ class XYScreens:
                     if self._state in (
                         XYScreensState.UPWARD,
                         XYScreensState.DOWNWARD,
-                    ) and await self._async_send_command(
-                        XYScreensCommand.STOP.to_bytes()
-                    ):
+                    ) and await self._async_send_command(self._commands.stop()):
                         self._post_stop()
                         self._update_callbacks()
                     break
