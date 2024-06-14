@@ -10,6 +10,7 @@ Created on 17 Nov 2022
 import asyncio
 import logging
 import time
+from asyncio.streams import StreamWriter
 from enum import IntEnum
 from typing import Any, Tuple
 
@@ -236,6 +237,7 @@ class XYScreens:
         return False
 
     async def _async_send_command(self, command: bytes) -> bool:
+        writer: StreamWriter
         try:
             _, writer = await serial_asyncio.open_serial_connection(
                 url=self._serial_port,
@@ -260,6 +262,7 @@ class XYScreens:
 
             # Close the connection.
             writer.close()
+            await writer.wait_closed()
 
             return True
         except serial.SerialException as ex:
