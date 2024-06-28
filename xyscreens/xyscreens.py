@@ -10,7 +10,6 @@ Created on 17 Nov 2022
 import asyncio
 import logging
 import time
-from asyncio.streams import StreamWriter
 from enum import IntEnum
 from typing import Any, Tuple
 
@@ -106,12 +105,15 @@ class XYScreensState(IntEnum):
 class XYScreens:
     "XYScreens class for controlling XY Screens projector screens and projector lifts."
 
+    # pylint: disable=too-many-instance-attributes
     # The serial port where the RS-485 interface and screen is connected to.
     _serial_port: str | None = None
-    # The amount of time in seconds it takes the cover to close from the fully-open state.
+    # The amount of time in seconds it takes the screen to close from the fully-open state.
     _up_duration: float
     # The amount of time in seconds it takes the screen to open up from the fully-closed state.
     _down_duration: float
+    # The commands that apply for this screen
+    _commands: XYScreensCommands
 
     # Current state of the screen. Defaults to Up when object is created.
     _state: XYScreensState = XYScreensState.UP
@@ -137,12 +139,15 @@ class XYScreens:
         # fully down.
     ):
         "Initialises the XYScreens object."
+        # pylint: disable=too-many-arguments
+
         # Validate the different arguments.
         assert serial_port is not None
         assert down_duration is not None
         assert down_duration > 0.0
         assert up_duration is None or up_duration > 0.0
         assert address is not None
+        assert position >= 0.0
 
         self._serial_port = serial_port
         # Set the duration for the screen to go down.
@@ -237,7 +242,7 @@ class XYScreens:
         return False
 
     async def _async_send_command(self, command: bytes) -> bool:
-        writer: StreamWriter
+        writer: asyncio.StreamWriter
         try:
             _, writer = await serial_asyncio.open_serial_connection(
                 url=self._serial_port,
