@@ -317,8 +317,8 @@ class XYScreens:
             try:
                 callback(self._state, self._position)
             # pylint: disable=broad-exception-caught
-            except Exception as ex:
-                logger.error("Exception in callback: %s", ex)
+            except Exception:
+                logger.exception("Exception in callback: %s", callback)
 
     def program(self) -> bool:
         "Program the address of the screen."
