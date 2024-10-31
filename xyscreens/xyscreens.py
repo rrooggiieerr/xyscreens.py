@@ -119,7 +119,7 @@ class XYScreens:
     _state: XYScreensState = XYScreensState.UP
     # Position of the screen where 0.0 is totally up and 100.0 is fully down.
     _position: float = 0.0
-    # Timestamp then the position was last recomputed
+    # Timestamp when the position was last recomputed
     _last_recompute_time: int = 0
 
     # List of callbacks which need to be called when the screen status changes.
