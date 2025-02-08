@@ -194,9 +194,8 @@ class XYScreens:
 
     def add_callback(self, callback):
         """
-        Adds an Event Occurred Callback to the UNii.
+        Adds a callback.
         """
-
         if self._callbacks is None:
             self._callbacks = []
 
