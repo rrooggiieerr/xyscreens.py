@@ -16,18 +16,9 @@ from typing import Any, Tuple
 import serial
 import serial_asyncio_fast as serial_asyncio
 
+from .task_helper import save_task_reference
+
 logger = logging.getLogger(__name__)
-
-background_tasks = set()
-
-
-def _add_background_task(task: asyncio.Task) -> None:
-    # Add task to the set. This creates a strong reference.
-    background_tasks.add(task)
-
-    # To prevent keeping references to finished tasks forever, make each task remove its own
-    # reference from the set after completion:
-    task.add_done_callback(background_tasks.discard)
 
 
 class XYScreensConnectionError(Exception):
@@ -479,7 +470,7 @@ class XYScreens:
             self._set_position_coroutine(target_position)
         )
 
-        _add_background_task(self._set_position_task)
+        save_task_reference(self._set_position_task)
 
         return True
 
