@@ -8,19 +8,18 @@ Created on 16 Nov 2022
 # pylint: disable=too-many-public-methods
 
 import asyncio
+import json
 import time
 import unittest
 from unittest.mock import Mock
 
 from xyscreens import XYScreens, XYScreensState
 
-from . import async_test
-
 _SERIAL_PORT = "/dev/tty.usbserial-110"
 _ADDRESS = bytes.fromhex("AAEEEE")
 
 
-class TestXYScreens(unittest.TestCase):
+class TestXYScreens(unittest.IsolatedAsyncioTestCase):
     """Unit test for the XYScreens library"""
 
     def test_constructor(self):
@@ -153,7 +152,6 @@ class TestXYScreens(unittest.TestCase):
         self.assertIs(XYScreensState.STOPPED, state)
         self.assertAlmostEqual(50.0, position, delta=0.3)
 
-    @async_test
     async def test_async_down(self):
         screen = XYScreens(_SERIAL_PORT, _ADDRESS, 5, 5)
         callback = Mock()
@@ -162,7 +160,6 @@ class TestXYScreens(unittest.TestCase):
         await asyncio.sleep(5.1)
         callback.assert_called_with(XYScreensState.DOWN, 100.0)
 
-    @async_test
     async def test_async_up(self):
         screen = XYScreens(_SERIAL_PORT, _ADDRESS, 5, 5, 100)
         callback = Mock()
@@ -171,28 +168,24 @@ class TestXYScreens(unittest.TestCase):
         await asyncio.sleep(5.1)
         callback.assert_called_with(XYScreensState.UP, 0.0)
 
-    @async_test
     async def test_async_stop(self):
         screen = XYScreens(_SERIAL_PORT, _ADDRESS, 60, 60)
         await screen.async_down()
         await asyncio.sleep(1)
         self.assertTrue(await screen.async_stop())
 
-    @async_test
     async def test_async_state_up(self):
         screen = XYScreens(_SERIAL_PORT, _ADDRESS, 10, 10, 100)
         await screen.async_up()
         await asyncio.sleep(10.1)
         self.assertIs(XYScreensState.UP, screen.state())
 
-    @async_test
     async def test_async_state_closing(self):
         screen = XYScreens(_SERIAL_PORT, _ADDRESS, 60, 60, 100)
         await screen.async_up()
         self.assertIs(XYScreensState.UPWARD, screen.state())
         await screen.async_stop()
 
-    @async_test
     async def test_async_state_stopped(self):
         screen = XYScreens(_SERIAL_PORT, _ADDRESS, 10, 10)
         await screen.async_down()
@@ -200,35 +193,30 @@ class TestXYScreens(unittest.TestCase):
         await screen.async_stop()
         self.assertIs(XYScreensState.STOPPED, screen.state())
 
-    @async_test
     async def test_async_state_downward(self):
         screen = XYScreens(_SERIAL_PORT, _ADDRESS, 10, 10)
         await screen.async_down()
         self.assertIs(XYScreensState.DOWNWARD, screen.state())
         await screen.async_stop()
 
-    @async_test
     async def test_async_state_down(self):
         screen = XYScreens(_SERIAL_PORT, _ADDRESS, 10, 10)
         await screen.async_down()
         await asyncio.sleep(10.1)
         self.assertIs(XYScreensState.DOWN, screen.state())
 
-    @async_test
     async def test_async_position_up(self):
         screen = XYScreens(_SERIAL_PORT, _ADDRESS, 10, 10, 100)
         await screen.async_up()
         await asyncio.sleep(10.1)
         self.assertEqual(0.0, screen.position())
 
-    @async_test
     async def test_async_position_down(self):
         screen = XYScreens(_SERIAL_PORT, _ADDRESS, 10, 10)
         await screen.async_down()
         await asyncio.sleep(10.1)
         self.assertEqual(100.0, screen.position())
 
-    @async_test
     async def test_async_position_halfway(self):
         screen = XYScreens(_SERIAL_PORT, _ADDRESS, 10, 10)
         await screen.async_down()
@@ -236,7 +224,6 @@ class TestXYScreens(unittest.TestCase):
         self.assertAlmostEqual(50.0, screen.position(), delta=0.3)
         await screen.async_stop()
 
-    @async_test
     async def test_async_change_direction_down(self):
         screen = XYScreens(_SERIAL_PORT, _ADDRESS, 10, 10, 100)
         await screen.async_up()
@@ -247,7 +234,6 @@ class TestXYScreens(unittest.TestCase):
         self.assertAlmostEqual(50.0, position, delta=0.3)
         await screen.async_stop()
 
-    @async_test
     async def test_async_change_direction_up(self):
         screen = XYScreens(_SERIAL_PORT, _ADDRESS, 10, 10)
         await screen.async_down()
@@ -258,7 +244,6 @@ class TestXYScreens(unittest.TestCase):
         self.assertAlmostEqual(50.0, position, delta=0.3)
         await screen.async_stop()
 
-    @async_test
     async def test_async_set_position_downward(self):
         screen = XYScreens(_SERIAL_PORT, _ADDRESS, 10, 10)
         await screen.async_set_position(50.0)
@@ -267,7 +252,6 @@ class TestXYScreens(unittest.TestCase):
         self.assertIs(XYScreensState.STOPPED, state)
         self.assertAlmostEqual(50.0, position, delta=0.3)
 
-    @async_test
     async def test_async_set_position_upward(self):
         screen = XYScreens(_SERIAL_PORT, _ADDRESS, 10, 10, 100.0)
         await screen.async_set_position(50.0)
@@ -276,7 +260,6 @@ class TestXYScreens(unittest.TestCase):
         self.assertIs(XYScreensState.STOPPED, state)
         self.assertAlmostEqual(50.0, position, delta=0.3)
 
-    @async_test
     async def test_async_set_position_stop(self):
         """Test stopping the screen while it is moving to a given position."""
         screen = XYScreens(_SERIAL_PORT, _ADDRESS, 10, 10)
@@ -307,8 +290,3 @@ class TestXYScreens(unittest.TestCase):
         (state, position) = screen.update_status()
         self.assertIs(XYScreensState.STOPPED, state)
         self.assertEqual(50.0, position)
-
-
-if __name__ == "__main__":
-    # import sys;sys.argv = ['', 'Test.testConstructor']
-    unittest.main()
