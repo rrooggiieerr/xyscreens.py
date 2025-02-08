@@ -94,6 +94,8 @@ if __name__ == "__main__":
 
     loop = asyncio.new_event_loop()
     try:
-        asyncio.run(main(args.port, bytes.fromhex(args.address), args.wait, args.action))
+        asyncio.run(
+            main(args.port, bytes.fromhex(args.address), args.wait, args.action)
+        )
     finally:
         loop.close()
