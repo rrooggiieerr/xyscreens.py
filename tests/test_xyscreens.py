@@ -21,8 +21,8 @@ _SETTINGS_JSON = "settings.json"
 class TestXYScreens(unittest.IsolatedAsyncioTestCase):
     """Unit test for the XYScreens library"""
 
-    serial_port: str = None
-    address: bytes = None
+    serial_port: str | None = None
+    address: bytes | None = None
 
     async def asyncSetUp(self):
         with open(_SETTINGS_JSON, encoding="utf8") as settings_file:
