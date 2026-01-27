@@ -112,7 +112,7 @@ Move the screen up: `python3 -m xyscreens <serial port> <address> up <duration>`
 
 Where `<address>` is the six character hexadecimal (three bytes) address of the device.
 `<duration>` is the optional time in seconds to move the screen up or down, when given the process
-will wait untill the screen is up or down and show the progress.
+will wait until the screen is up or down and show the progress.
 
 For XY Screens devices the default address is `AAEEEE`, while for See Max devices the default
 address is `EEEEEE`. If you have reprogrammed the device address use the appropriate address.
