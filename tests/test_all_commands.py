@@ -14,7 +14,7 @@ class TestXYScreens(unittest.IsolatedAsyncioTestCase):
         screen = XYScreens(_SERIAL_PORT, _ADDRESS, 60)
         for i in range(256):
             print(f"Trying command {i.to_bytes(1).hex()}")
-            command = b"\xFF" + _ADDRESS + i.to_bytes(1)
+            command = b"\xff" + _ADDRESS + i.to_bytes(1)
             await screen._async_send_command(command)
             await asyncio.sleep(5)
             await screen.async_stop()

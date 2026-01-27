@@ -35,7 +35,7 @@ async def main(port: str, address: bytes, wait: int, action: str):
                 return
 
             while wait > 0:
-                (state, position) = screen.update_status()
+                state, position = screen.update_status()
                 _print_status(state, position)
                 if state == XYScreensState.UP:
                     if _LOGGER.level <= logging.DEBUG:
@@ -48,7 +48,7 @@ async def main(port: str, address: bytes, wait: int, action: str):
                 return
 
             while wait > 0:
-                (state, position) = screen.update_status()
+                state, position = screen.update_status()
                 _print_status(state, position)
                 if state == XYScreensState.DOWN:
                     if _LOGGER.level <= logging.DEBUG:

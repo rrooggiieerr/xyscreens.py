@@ -32,13 +32,13 @@ class XYScreensConnectionError(Exception):
 class XYScreensCommands:
     "The commands needed to move and stop the screen"
 
-    _PREFIX = b"\xFF"
-    _UP = b"\xDD"
-    _STOP = b"\xCC"
-    _DOWN = b"\xEE"
-    _MICRO_UP = b"\xC9"
-    _MICRO_DOWN = b"\xE9"
-    _PROGRAM = b"\xAA"
+    _PREFIX = b"\xff"
+    _UP = b"\xdd"
+    _STOP = b"\xcc"
+    _DOWN = b"\xee"
+    _MICRO_UP = b"\xc9"
+    _MICRO_DOWN = b"\xe9"
+    _PROGRAM = b"\xaa"
 
     def __init__(self, address: bytes):
         self._address = address
@@ -524,7 +524,7 @@ class XYScreens:
 
     def state(self) -> XYScreensState:
         "Returns the current state of the screen."
-        (state, _) = self.update_status()
+        state, _ = self.update_status()
 
         return state
 
@@ -532,6 +532,6 @@ class XYScreens:
         """
         Returns the current position of the screen where 0.0 is totally up and 100.0 is fully down.
         """
-        (_, position) = self.update_status()
+        _, position = self.update_status()
 
         return position
