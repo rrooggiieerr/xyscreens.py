@@ -15,7 +15,7 @@ import asyncio
 import logging
 import time
 from enum import IntEnum
-from typing import Any, Tuple
+from typing import Any
 
 import serial
 import serial_asyncio_fast as serial_asyncio
@@ -271,7 +271,7 @@ class XYScreens:
 
         return False
 
-    def update_status(self) -> Tuple[XYScreensState, float]:
+    def update_status(self) -> tuple[XYScreensState, float]:
         """
         Calculates and returns the status and position of the screen based on the direction the
         screen is moving.
