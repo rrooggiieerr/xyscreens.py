@@ -47,26 +47,32 @@ class XYScreensCommands:
     def __init__(self, address: bytes):
         self._address = address
 
+    @property
     def up(self) -> bytes:
         """Returns the command needed to start moving the screen up."""
         return XYScreensCommands._PREFIX + self._address + XYScreensCommands._UP
 
+    @property
     def micro_up(self) -> bytes:
         """Returns the command needed to move the screen up one step."""
         return XYScreensCommands._PREFIX + self._address + XYScreensCommands._MICRO_UP
 
+    @property
     def stop(self) -> bytes:
         """Returns the command needed for stopping the screen."""
         return XYScreensCommands._PREFIX + self._address + XYScreensCommands._STOP
 
+    @property
     def down(self) -> bytes:
         """Returns the command needed to start moving the screen down."""
         return XYScreensCommands._PREFIX + self._address + XYScreensCommands._DOWN
 
+    @property
     def micro_down(self) -> bytes:
         """Returns the command needed to move the screen down one step."""
         return XYScreensCommands._PREFIX + self._address + XYScreensCommands._MICRO_DOWN
 
+    @property
     def program(self) -> bytes:
         """Returns the command needed for programming the screen address."""
         return XYScreensCommands._PREFIX + self._address + XYScreensCommands._PROGRAM
@@ -316,11 +322,11 @@ class XYScreens:
 
     def program(self) -> bool:
         """Program the address of the screen."""
-        return self._send_command(self._commands.program())
+        return self._send_command(self._commands.program)
 
     async def async_program(self) -> bool:
         """Program the address of the screen."""
-        return await self._async_send_command(self._commands.program())
+        return await self._async_send_command(self._commands.program)
 
     def _post_up(self) -> bool:
         if self._state not in (XYScreensState.UPWARD, XYScreensState.UP):
@@ -334,7 +340,7 @@ class XYScreens:
     def up(self) -> bool:
         """Move the screen up."""
 
-        if self._send_command(self._commands.up()):
+        if self._send_command(self._commands.up):
             return self._post_up()
 
         return False
@@ -347,12 +353,12 @@ class XYScreens:
     def micro_up(self) -> bool:
         """Move the screen up one step."""
 
-        return self._send_command(self._commands.micro_up())
+        return self._send_command(self._commands.micro_up)
 
     async def async_micro_up(self) -> bool:
         """Move the screen up one step."""
 
-        return await self._async_send_command(self._commands.micro_up())
+        return await self._async_send_command(self._commands.micro_up)
 
     def _post_stop(self) -> bool:
         if self._state not in (
@@ -370,7 +376,7 @@ class XYScreens:
     def stop(self) -> bool:
         """Stop the screen."""
 
-        if self._send_command(self._commands.stop()):
+        if self._send_command(self._commands.stop):
             return self._post_stop()
 
         return False
@@ -380,7 +386,7 @@ class XYScreens:
 
         await self._cancel_set_position()
 
-        if await self._async_send_command(self._commands.stop()) and self._post_stop():
+        if await self._async_send_command(self._commands.stop) and self._post_stop():
             self._update_callbacks()
             return True
 
@@ -397,7 +403,7 @@ class XYScreens:
     def down(self) -> bool:
         """Move the screen down."""
 
-        if self._send_command(self._commands.down()):
+        if self._send_command(self._commands.down):
             return self._post_down()
 
         return False
@@ -410,12 +416,12 @@ class XYScreens:
     def micro_down(self) -> bool:
         """Move the screen down one step."""
 
-        return self._send_command(self._commands.micro_down())
+        return self._send_command(self._commands.micro_down)
 
     async def async_micro_down(self) -> bool:
         """Move the screen down one step."""
 
-        return await self._async_send_command(self._commands.micro_down())
+        return await self._async_send_command(self._commands.micro_down)
 
     def _target_position_reached(self, target_position: float) -> bool:
         """Calculates if the target position has been reached."""
@@ -462,11 +468,11 @@ class XYScreens:
         await self._cancel_set_position()
 
         if self._position < target_position:
-            if not await self._async_send_command(self._commands.down()):
+            if not await self._async_send_command(self._commands.down):
                 return False
             self._post_down()
         elif self._position > target_position:
-            if not await self._async_send_command(self._commands.up()):
+            if not await self._async_send_command(self._commands.up):
                 return False
             self._post_up()
 
@@ -516,7 +522,7 @@ class XYScreens:
                     if self._state in (
                         XYScreensState.UPWARD,
                         XYScreensState.DOWNWARD,
-                    ) and await self._async_send_command(self._commands.stop()):
+                    ) and await self._async_send_command(self._commands.stop):
                         self._post_stop()
                         self._update_callbacks()
                     break
