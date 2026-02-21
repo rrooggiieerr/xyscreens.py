@@ -7,7 +7,7 @@ Created on 17 Nov 2022
 """
 
 try:
-    from ._version import __version__
+    from ._version import __version__ as __version__
 except ModuleNotFoundError:
     pass
 from .xyscreens import XYScreens, XYScreensConnectionError, XYScreensState
