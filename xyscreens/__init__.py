@@ -132,7 +132,7 @@ class XYScreens:
         ) = None,  # Duration in seconds for the screen to go up.
         position: float = 0.0,  # Position of the screen where 0.0 is totally up and 100.0 is
         # fully down.
-    ):
+    ) -> None:
         "Initialises the XYScreens object."
         # pylint: disable=too-many-arguments
 
@@ -187,7 +187,7 @@ class XYScreens:
 
         self._last_recompute_time = time.time_ns()
 
-    def add_callback(self, callback):
+    def add_callback(self, callback) -> None:
         """
         Adds a callback.
         """
@@ -303,7 +303,7 @@ class XYScreens:
 
         return (self._state, self._position)
 
-    def _update_callbacks(self):
+    def _update_callbacks(self) -> None:
         if self._callbacks is None:
             return
 
@@ -504,7 +504,7 @@ class XYScreens:
 
         return self._set_position_task is None
 
-    async def _set_position_coroutine(self, target_position: float):
+    async def _set_position_coroutine(self, target_position: float) -> None:
         sleep_duration = min(self._up_duration, self._down_duration) / 1000.0
         while True:
             try:
