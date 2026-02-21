@@ -21,7 +21,7 @@ def _print_status(state: XYScreensState, position: float):
 
 
 async def main(port: str, address: bytes, wait: int, action: str) -> None:
-    "The main function."
+    """Execute the main CLI logic for controlling XY Screens."""
 
     if wait <= 0:
         down_duration = 1
