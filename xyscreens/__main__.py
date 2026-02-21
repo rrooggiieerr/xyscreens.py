@@ -74,12 +74,22 @@ async def main(port: str, address: bytes, wait: int, action: str):
 if __name__ == "__main__":
     # Read command line arguments
     argparser = argparse.ArgumentParser()
-    argparser.add_argument("port")
-    argparser.add_argument("address")
+    argparser.add_argument("port", help="Serial port (e.g., /dev/ttyUSB0 or COM3)")
     argparser.add_argument(
-        "action", choices=["up", "stop", "down", "micro_up", "micro_down", "program"]
+        "address", help="Device address in hexadecimal (e.g., AAEEEE)"
     )
-    argparser.add_argument("wait", nargs="?", type=int, default=0)
+    argparser.add_argument(
+        "action",
+        choices=["up", "stop", "down", "micro_up", "micro_down", "program"],
+        help="Action to perform",
+    )
+    argparser.add_argument(
+        "wait",
+        nargs="?",
+        type=int,
+        default=0,
+        help="Time in seconds to wait for up or down to complete",
+    )
     argparser.add_argument("--debug", dest="debugLogging", action="store_true")
 
     args = argparser.parse_args()
