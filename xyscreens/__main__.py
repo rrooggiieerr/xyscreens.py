@@ -20,7 +20,7 @@ def _print_status(state: XYScreensState, position: float):
         print(f"{state!s:8}: {position:5.1f} %", end="\r")
 
 
-async def main(port: str, address: bytes, wait: int, action: str):
+async def main(port: str, address: bytes, wait: int, action: str) -> None:
     "The main function."
 
     if wait <= 0:
