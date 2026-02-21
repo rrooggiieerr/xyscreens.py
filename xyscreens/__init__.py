@@ -34,7 +34,7 @@ class XYScreensConnectionError(Exception):
 
 
 class XYScreensCommands:
-    "The commands needed to move and stop the screen"
+    """The commands needed to move and stop the screen"""
 
     _PREFIX = b"\xff"
     _UP = b"\xdd"
@@ -48,32 +48,32 @@ class XYScreensCommands:
         self._address = address
 
     def up(self) -> bytes:
-        "Returns the command needed to start moving the screen up."
+        """Returns the command needed to start moving the screen up."""
         return XYScreensCommands._PREFIX + self._address + XYScreensCommands._UP
 
     def micro_up(self) -> bytes:
-        "Returns the command needed to move the screen up one step."
+        """Returns the command needed to move the screen up one step."""
         return XYScreensCommands._PREFIX + self._address + XYScreensCommands._MICRO_UP
 
     def stop(self) -> bytes:
-        "Returns the command needed for stopping the screen."
+        """Returns the command needed for stopping the screen."""
         return XYScreensCommands._PREFIX + self._address + XYScreensCommands._STOP
 
     def down(self) -> bytes:
-        "Returns the command needed to start moving the screen down."
+        """Returns the command needed to start moving the screen down."""
         return XYScreensCommands._PREFIX + self._address + XYScreensCommands._DOWN
 
     def micro_down(self) -> bytes:
-        "Returns the command needed to move the screen down one step."
+        """Returns the command needed to move the screen down one step."""
         return XYScreensCommands._PREFIX + self._address + XYScreensCommands._MICRO_DOWN
 
     def program(self) -> bytes:
-        "Returns the command needed for programming the screen address."
+        """Returns the command needed for programming the screen address."""
         return XYScreensCommands._PREFIX + self._address + XYScreensCommands._PROGRAM
 
 
 class XYScreensState(IntEnum):
-    "The different states the screen can be."
+    """The different states the screen can be."""
 
     # Stopped, standing still in a position anywhere between up and down but not up and down.
     STOPPED = 0
@@ -87,7 +87,7 @@ class XYScreensState(IntEnum):
     DOWN = 4
 
     def __str__(self) -> str:
-        "Human readable states."
+        """Human readable states."""
         return {
             self.STOPPED: "Stopped",
             self.UP: "Up",
@@ -98,7 +98,7 @@ class XYScreensState(IntEnum):
 
 
 class XYScreens:
-    "XYScreens class for controlling XY Screens projector screens and projector lifts."
+    """XYScreens class for controlling XY Screens projector screens and projector lifts."""
 
     # pylint: disable=too-many-instance-attributes
     # The serial port where the RS-485 interface and screen is connected to.
@@ -133,7 +133,7 @@ class XYScreens:
         position: float = 0.0,  # Position of the screen where 0.0 is totally up and 100.0 is
         # fully down.
     ) -> None:
-        "Initialises the XYScreens object."
+        """Initialises the XYScreens object."""
         # pylint: disable=too-many-arguments
 
         # Validate the different arguments.
@@ -315,11 +315,11 @@ class XYScreens:
                 logger.exception("Exception in callback: %s", callback)
 
     def program(self) -> bool:
-        "Program the address of the screen."
+        """Program the address of the screen."""
         return self._send_command(self._commands.program())
 
     async def async_program(self) -> bool:
-        "Program the address of the screen."
+        """Program the address of the screen."""
         return await self._async_send_command(self._commands.program())
 
     def _post_up(self) -> bool:
@@ -332,7 +332,7 @@ class XYScreens:
 
     # pylint: disable=C0103
     def up(self) -> bool:
-        "Move the screen up."
+        """Move the screen up."""
 
         if self._send_command(self._commands.up()):
             return self._post_up()
@@ -340,17 +340,17 @@ class XYScreens:
         return False
 
     async def async_up(self) -> bool:
-        "Move the screen up."
+        """Move the screen up."""
 
         return await self.async_set_position(0.0)
 
     def micro_up(self) -> bool:
-        "Move the screen up one step."
+        """Move the screen up one step."""
 
         return self._send_command(self._commands.micro_up())
 
     async def async_micro_up(self) -> bool:
-        "Move the screen up one step."
+        """Move the screen up one step."""
 
         return await self._async_send_command(self._commands.micro_up())
 
@@ -368,7 +368,7 @@ class XYScreens:
         return False
 
     def stop(self) -> bool:
-        "Stop the screen."
+        """Stop the screen."""
 
         if self._send_command(self._commands.stop()):
             return self._post_stop()
@@ -376,7 +376,7 @@ class XYScreens:
         return False
 
     async def async_stop(self) -> bool:
-        "Stop the screen."
+        """Stop the screen."""
 
         await self._cancel_set_position()
 
@@ -395,7 +395,7 @@ class XYScreens:
         return False
 
     def down(self) -> bool:
-        "Move the screen down."
+        """Move the screen down."""
 
         if self._send_command(self._commands.down()):
             return self._post_down()
@@ -403,17 +403,17 @@ class XYScreens:
         return False
 
     async def async_down(self) -> bool:
-        "Move the screen down."
+        """Move the screen down."""
 
         return await self.async_set_position(100.0)
 
     def micro_down(self) -> bool:
-        "Move the screen down one step."
+        """Move the screen down one step."""
 
         return self._send_command(self._commands.micro_down())
 
     async def async_micro_down(self) -> bool:
-        "Move the screen down one step."
+        """Move the screen down one step."""
 
         return await self._async_send_command(self._commands.micro_down())
 
@@ -527,7 +527,7 @@ class XYScreens:
                 break
 
     def state(self) -> XYScreensState:
-        "Returns the current state of the screen."
+        """Returns the current state of the screen."""
         state, _ = self.update_status()
 
         return state
