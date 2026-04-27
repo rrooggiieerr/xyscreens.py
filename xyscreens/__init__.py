@@ -592,7 +592,9 @@ class XYScreensTCP(_XYScreens):
         assert isinstance(port, (int, float)) and 1 <= int(port) <= 65535
         self._host = host
         self._port = int(port)
-        super().__init__(f"{host}:{self._port}", address, down_duration, up_duration, position)
+        super().__init__(
+            f"{host}:{self._port}", address, down_duration, up_duration, position
+        )
 
     @property
     def host(self) -> str:
@@ -611,7 +613,9 @@ class XYScreensTCP(_XYScreens):
 
                 logger.debug("Connecting to TCP endpoint %s:%d", self._host, self._port)
                 sock.connect((self._host, self._port))
-                logger.debug("TCP connection established to %s:%d", self._host, self._port)
+                logger.debug(
+                    "TCP connection established to %s:%d", self._host, self._port
+                )
 
                 logger.debug("Sending: 0x%s", command.hex())
                 sock.sendall(command)

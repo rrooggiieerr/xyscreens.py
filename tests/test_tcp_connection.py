@@ -86,7 +86,12 @@ class TestXYScreensTCP(unittest.TestCase):
     def test_constructor_with_all_args(self):
         """Test XYScreensTCP constructor with all arguments."""
         screen = XYScreensTCP(
-            "192.168.1.100", 9997, self.address, self.down_duration, self.up_duration, 50.0
+            "192.168.1.100",
+            9997,
+            self.address,
+            self.down_duration,
+            self.up_duration,
+            50.0,
         )
         self.assertEqual(screen.host, "192.168.1.100")
         self.assertEqual(screen.port, 9997)
@@ -99,7 +104,9 @@ class TestXYScreensTCP(unittest.TestCase):
         server.start()
 
         try:
-            screen = XYScreensTCP(server.host, server.port, self.address, self.down_duration)
+            screen = XYScreensTCP(
+                server.host, server.port, self.address, self.down_duration
+            )
 
             result = screen._send_command(screen._commands.up)
             self.assertTrue(result)
@@ -145,7 +152,9 @@ class TestXYScreensTCPAsync(unittest.IsolatedAsyncioTestCase):
         server.start()
 
         try:
-            screen = XYScreensTCP(server.host, server.port, self.address, self.down_duration)
+            screen = XYScreensTCP(
+                server.host, server.port, self.address, self.down_duration
+            )
 
             result = await screen._async_send_command(screen._commands.down)
             self.assertTrue(result)
@@ -160,7 +169,6 @@ class TestXYScreensTCPAsync(unittest.IsolatedAsyncioTestCase):
     async def test_async_send_command_connection_error(self):
         """Test async TCP connection error handling."""
         screen = XYScreensTCP("127.0.0.1", 1, self.address, self.down_duration)
-
 
         with self.assertRaises(XYScreensConnectionError) as cm:
             await screen._async_send_command(screen._commands.stop)
@@ -183,7 +191,11 @@ class TestXYScreensTCPAsync(unittest.IsolatedAsyncioTestCase):
 
         try:
             screen = XYScreensTCP(
-                server.host, server.port, self.address, self.down_duration, position=50.0
+                server.host,
+                server.port,
+                self.address,
+                self.down_duration,
+                position=50.0,
             )
 
             result = await screen.async_up()
@@ -204,7 +216,7 @@ class TestSerialConnection(unittest.TestCase):
         self.address = b"\x01"
         self.down_duration = 30.0
 
-    @patch('serial.Serial')
+    @patch("serial.Serial")
     def test_send_command_uses_serial(self, mock_serial):
         """Test that XYScreens._send_command uses serial transport."""
         mock_connection = Mock()
