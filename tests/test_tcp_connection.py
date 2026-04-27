@@ -233,7 +233,7 @@ class TestSerialConnection(unittest.TestCase):
     def test_serial_port_property(self):
         """Test that XYScreens.serial_port returns the serial port."""
         screen = XYScreens.__new__(XYScreens)
-        screen._connection_endpoint = "/dev/ttyUSB0"
+        screen._serial_port = "/dev/ttyUSB0"
         self.assertEqual(screen.serial_port, "/dev/ttyUSB0")
 
 
