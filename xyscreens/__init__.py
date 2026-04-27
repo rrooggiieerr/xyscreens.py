@@ -538,6 +538,10 @@ class XYScreens(_XYScreens):
     ) -> None:
         """Initialises the XYScreens object."""
         assert serial_port is not None
+        _parts = serial_port.rsplit(":", 1)
+        assert not (
+            len(_parts) == 2 and _parts[1].isdigit()
+        ), f"'{serial_port}' looks like a TCP endpoint, use XYScreensTCP instead"
         self._serial_port = serial_port
         super().__init__(address, down_duration, up_duration, position)
 
@@ -608,6 +612,9 @@ class XYScreensTCP(_XYScreens):
     ) -> None:
         """Initialises the XYScreensTCP object."""
         assert host is not None and len(host) > 0
+        assert not host.startswith(
+            "/"
+        ), f"'{host}' looks like a device path, use XYScreens instead"
         assert isinstance(port, (int, float)) and 1 <= int(port) <= 65535
         self._host = host
         self._port = int(port)

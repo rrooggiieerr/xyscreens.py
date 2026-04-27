@@ -237,5 +237,39 @@ class TestSerialConnection(unittest.TestCase):
         self.assertEqual(screen.serial_port, "/dev/ttyUSB0")
 
 
+class TestClassSeparation(unittest.TestCase):
+    """Test that serial and TCP classes cannot be used interchangeably."""
+
+    def setUp(self):
+        """Set up test fixtures."""
+        self.address = b"\x01"
+        self.down_duration = 30.0
+
+    def test_xyscreens_serial_does_not_accept_tcp_endpoint(self):
+        """XYScreens (serial) must not be used with a TCP host:port string."""
+        with self.assertRaises((ValueError, AssertionError)):
+            XYScreens("192.168.0.133:8887", self.address, self.down_duration)
+
+    def test_xyscreens_serial_does_not_accept_ip_address(self):
+        """XYScreens (serial) must not be used with an IP-like string."""
+        with self.assertRaises((ValueError, AssertionError)):
+            XYScreens("10.0.0.1:9997", self.address, self.down_duration)
+
+    def test_xyscreens_serial_accepts_device_path(self):
+        """XYScreens (serial) accepts a valid device path."""
+        screen = XYScreens("/dev/ttyUSB0", self.address, self.down_duration)
+        self.assertEqual(screen.serial_port, "/dev/ttyUSB0")
+
+    def test_xyscreens_serial_accepts_com_port(self):
+        """XYScreens (serial) accepts a Windows COM port."""
+        screen = XYScreens("COM3", self.address, self.down_duration)
+        self.assertEqual(screen.serial_port, "COM3")
+
+    def test_xyscreens_tcp_does_not_accept_device_path(self):
+        """XYScreensTCP must not be used with a serial device path."""
+        with self.assertRaises((ValueError, AssertionError)):
+            XYScreensTCP("/dev/ttyUSB0", 9997, self.address, self.down_duration)
+
+
 if __name__ == "__main__":
     unittest.main()
