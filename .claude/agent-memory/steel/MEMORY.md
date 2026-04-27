@@ -1,1 +1,0 @@
-- [Use venv for pip packages](feedback_use_venv.md) — always use virtual environments, never install globally
