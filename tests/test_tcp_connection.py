@@ -10,7 +10,7 @@ import socket
 import threading
 import time
 import unittest
-from unittest.mock import Mock, patch, AsyncMock
+from unittest.mock import AsyncMock, Mock, patch
 
 from xyscreens import XYScreens, XYScreensConnectionError, XYScreensState, XYScreensTCP
 
