@@ -13,6 +13,7 @@ except ModuleNotFoundError:
 
 import asyncio
 import logging
+import socket
 import time
 from enum import IntEnum
 from typing import Any
@@ -103,12 +104,26 @@ class XYScreensState(IntEnum):
         }[self]
 
 
-class XYScreens:
-    """XYScreens class for controlling XY Screens projector screens and projector lifts."""
+class _SocketConnection:
+    """Wraps a TCP socket to provide a file-like write interface."""
+
+    def __init__(self, sock: socket.socket):
+        self._sock = sock
+
+    def write(self, data: bytes) -> None:
+        self._sock.sendall(data)
+
+    def flush(self) -> None:
+        pass
+
+    def close(self) -> None:
+        self._sock.close()
+
+
+class _XYScreens:
+    """Base class for controlling XY Screens projector screens and projector lifts."""
 
     # pylint: disable=too-many-instance-attributes
-    # The serial port where the RS-485 interface and screen is connected to.
-    _serial_port: str | None = None
     # The amount of time in seconds it takes the screen to close from the fully-open state.
     _up_duration: float
     # The amount of time in seconds it takes the screen to open up from the fully-closed state.
@@ -130,7 +145,6 @@ class XYScreens:
 
     def __init__(
         self,
-        serial_port: str,  # The serial port where the RS-485 interface and screen is connected to.
         address: bytes,
         down_duration: float,  # Duration in seconds for the screen to go down.
         up_duration: (
@@ -139,18 +153,15 @@ class XYScreens:
         position: float = 0.0,  # Position of the screen where 0.0 is totally up and 100.0 is
         # fully down.
     ) -> None:
-        """Initialises the XYScreens object."""
-        # pylint: disable=too-many-arguments
+        """Initialises the _XYScreens object."""
 
         # Validate the different arguments.
-        assert serial_port is not None
         assert down_duration is not None
         assert down_duration > 0.0
         assert up_duration is None or up_duration > 0.0
         assert address is not None
         assert position >= 0.0
 
-        self._serial_port = serial_port
         # Set the duration for the screen to go down.
         self._down_duration = down_duration
 
@@ -202,80 +213,44 @@ class XYScreens:
 
         self._callbacks.append(callback)
 
+    def _connect(self):
+        raise NotImplementedError
+
+    async def _async_connect(self) -> asyncio.StreamWriter:
+        raise NotImplementedError
+
     def _send_command(self, command: bytes) -> bool:
+        connection = self._connect()
         try:
-            # Create the connection instance.
-            connection = serial.Serial(
-                port=self._serial_port,
-                baudrate=2400,
-                bytesize=serial.EIGHTBITS,
-                parity=serial.PARITY_NONE,
-                stopbits=serial.STOPBITS_ONE,
-                timeout=1,
-            )
-        except serial.SerialException as ex:
-            raise XYScreensConnectionError(
-                f"Unable to connect to device {self._serial_port}"
-            ) from ex
-        logger.debug("Device %s connected", self._serial_port)
-
-        try:
-            # Open the connection.
-            if not connection.is_open:
-                connection.open()
-
-            # Send the command.
             logger.debug("Sending: 0x%s", command.hex())
             connection.write(command)
             connection.flush()
             logger.info("Command successfully sent")
-
-            # Close the connection.
             connection.close()
-
             return True
-        except serial.SerialException as ex:
+        except XYScreensConnectionError:
+            raise
+        except Exception as ex:
             raise XYScreensConnectionError(
-                f"Error while writing to device {self._serial_port}"
+                f"Error sending command to {self.device}"
             ) from ex
-
-        return False
 
     async def _async_send_command(self, command: bytes) -> bool:
-        writer: asyncio.StreamWriter
+        writer = await self._async_connect()
         try:
-            _, writer = await serial_asyncio.open_serial_connection(
-                url=self._serial_port,
-                baudrate=2400,
-                bytesize=serial.EIGHTBITS,
-                parity=serial.PARITY_NONE,
-                stopbits=serial.STOPBITS_ONE,
-                timeout=1,
-            )
-        except serial.SerialException as ex:
-            raise XYScreensConnectionError(
-                f"Unable to connect to device {self._serial_port}"
-            ) from ex
-        logger.debug("Device %s connected", self._serial_port)
-
-        try:
-            # Send the command.
             logger.debug("Sending: 0x%s", command.hex())
             writer.write(command)
             await writer.drain()
             logger.info("Command successfully sent")
-
-            # Close the connection.
             writer.close()
             await writer.wait_closed()
-
             return True
-        except serial.SerialException as ex:
+        except XYScreensConnectionError:
+            raise
+        except Exception as ex:
             raise XYScreensConnectionError(
-                f"Error while writing to device {self._serial_port}"
+                f"Error sending command to {self.device}"
             ) from ex
-
-        return False
 
     def update_status(self) -> tuple[XYScreensState, float]:
         """
@@ -545,3 +520,146 @@ class XYScreens:
         _, position = self.update_status()
 
         return position
+
+
+class XYScreens(_XYScreens):
+    """XYScreens class for controlling XY Screens projector screens and projector lifts via serial."""
+
+    def __init__(
+        self,
+        serial_port: str,  # The serial port where the RS-485 interface and screen is connected to.
+        address: bytes,
+        down_duration: float,  # Duration in seconds for the screen to go down.
+        up_duration: (
+            float | None
+        ) = None,  # Duration in seconds for the screen to go up.
+        position: float = 0.0,  # Position of the screen where 0.0 is totally up and 100.0 is
+        # fully down.
+    ) -> None:
+        """Initialises the XYScreens object."""
+        assert serial_port is not None
+        _parts = serial_port.rsplit(":", 1)
+        assert not (
+            len(_parts) == 2 and _parts[1].isdigit()
+        ), f"'{serial_port}' looks like a TCP endpoint, use XYScreensTCP instead"
+        self._serial_port = serial_port
+        super().__init__(address, down_duration, up_duration, position)
+
+    @property
+    def device(self) -> str:
+        """Returns the serial port."""
+        return self._serial_port
+
+    @property
+    def serial_port(self) -> str:
+        """Returns the serial port for backward compatibility."""
+        return self._serial_port
+
+    def _connect(self):
+        try:
+            connection = serial.Serial(
+                port=self._serial_port,
+                baudrate=2400,
+                bytesize=serial.EIGHTBITS,
+                parity=serial.PARITY_NONE,
+                stopbits=serial.STOPBITS_ONE,
+                timeout=1,
+            )
+        except serial.SerialException as ex:
+            raise XYScreensConnectionError(
+                f"Unable to connect to device {self._serial_port}"
+            ) from ex
+        logger.debug("Device %s connected", self._serial_port)
+
+        if not connection.is_open:
+            connection.open()
+
+        return connection
+
+    async def _async_connect(self) -> asyncio.StreamWriter:
+        try:
+            _, writer = await serial_asyncio.open_serial_connection(
+                url=self._serial_port,
+                baudrate=2400,
+                bytesize=serial.EIGHTBITS,
+                parity=serial.PARITY_NONE,
+                stopbits=serial.STOPBITS_ONE,
+                timeout=1,
+            )
+        except serial.SerialException as ex:
+            raise XYScreensConnectionError(
+                f"Unable to connect to device {self._serial_port}"
+            ) from ex
+        logger.debug("Device %s connected", self._serial_port)
+
+        return writer
+
+
+class XYScreensTCP(_XYScreens):
+    """XYScreens class for controlling XY Screens projector screens and projector lifts via TCP."""
+
+    def __init__(
+        self,
+        host: str,
+        port: int,
+        address: bytes,
+        down_duration: float,  # Duration in seconds for the screen to go down.
+        up_duration: (
+            float | None
+        ) = None,  # Duration in seconds for the screen to go up.
+        position: float = 0.0,  # Position of the screen where 0.0 is totally up and 100.0 is
+        # fully down.
+    ) -> None:
+        """Initialises the XYScreensTCP object."""
+        assert host is not None and len(host) > 0
+        assert not host.startswith(
+            "/"
+        ), f"'{host}' looks like a device path, use XYScreens instead"
+        assert isinstance(port, (int, float)) and 1 <= int(port) <= 65535
+        self._host = host
+        self._port = int(port)
+        super().__init__(address, down_duration, up_duration, position)
+
+    @property
+    def device(self) -> str:
+        """Returns the TCP endpoint as host:port."""
+        return f"{self._host}:{self._port}"
+
+    @property
+    def host(self) -> str:
+        """Returns the TCP host."""
+        return self._host
+
+    @property
+    def port(self) -> int:
+        """Returns the TCP port."""
+        return self._port
+
+    def _connect(self):
+        try:
+            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            sock.settimeout(1.0)
+
+            logger.debug("Connecting to TCP endpoint %s:%d", self._host, self._port)
+            sock.connect((self._host, self._port))
+            logger.debug("TCP connection established to %s:%d", self._host, self._port)
+
+            return _SocketConnection(sock)
+        except (socket.error, OSError) as ex:
+            raise XYScreensConnectionError(
+                f"Error while connecting to TCP endpoint {self._host}:{self._port}: {ex}"
+            ) from ex
+
+    async def _async_connect(self) -> asyncio.StreamWriter:
+        try:
+            logger.debug("Connecting to TCP endpoint %s:%d", self._host, self._port)
+            _, writer = await asyncio.wait_for(
+                asyncio.open_connection(self._host, self._port), timeout=1.0
+            )
+            logger.debug("TCP connection established to %s:%d", self._host, self._port)
+
+            return writer
+        except (asyncio.TimeoutError, OSError) as ex:
+            raise XYScreensConnectionError(
+                f"Error while connecting to TCP endpoint {self._host}:{self._port}: {ex}"
+            ) from ex

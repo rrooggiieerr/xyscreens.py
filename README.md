@@ -12,7 +12,8 @@
 ## Introduction
 
 This Python library lets you control XY Screens and See Max projector screens and lifts over the
-serial and RS-485 interface.
+serial and RS-485 interface. Both direct USB-to-RS485 adapters and RS485-to-Ethernet converters
+(TCP connections) are supported.
 
 This Python library was first implemented for XY Screens. After I was informed that the See Max
 devices use a very similar protocol support, for these devices has been added.
@@ -50,6 +51,25 @@ I use this cheap USB RS-485 controller which you can find on
 ![image](https://raw.githubusercontent.com/rrooggiieerr/xyscreens.py/main/usb-rs485.png)
 
 See the documentation of your specific projector screen or lift on how to wire yours correctly.
+
+### Network connection (RS485-to-Ethernet converter)
+
+As an alternative to a direct USB connection you can use an RS485-to-Ethernet converter to control
+your projector screen or lift over the network via TCP. This is useful when the screen is not close
+to your Home Assistant server.
+
+Any RS485-to-Ethernet converter that provides a transparent TCP socket to the RS-485 bus should
+work. Configure it for 2400 baud 8N1 to match the device protocol.
+
+An example of such a converter is the [CDEBYTE NA111-E](https://www.cdebyte.com/products/NA111-E/2).
+
+Connect the D+ and D- terminals of the converter to the corresponding RS-485 lines of your
+projector screen or lift. The RS-485 pinout varies between screen models, so refer to the
+documentation of your specific device.
+
+When using the library, pass the network endpoint as `host:port` instead of a serial port path:
+
+`python3 -m xyscreens 192.168.1.100:9997 AAEEEE down 60`
 
 ## Protocol
 
