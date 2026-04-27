@@ -12,7 +12,7 @@ import time
 import unittest
 from unittest.mock import Mock, patch, AsyncMock
 
-from xyscreens import XYScreens, XYScreensConnectionError, XYScreensState
+from xyscreens import XYScreens, XYScreensConnectionError, XYScreensState, XYScreensTCP
 
 
 class MockTCPServer:
@@ -33,7 +33,6 @@ class MockTCPServer:
         self.server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self.server_socket.bind((self.host, self.port))
 
-        # Get the actual port if 0 was specified
         self.port = self.server_socket.getsockname()[1]
 
         self.server_socket.listen(5)
@@ -43,7 +42,6 @@ class MockTCPServer:
         self.server_thread.daemon = True
         self.server_thread.start()
 
-        # Wait a bit for server to start
         time.sleep(0.1)
 
     def stop(self):
@@ -68,13 +66,9 @@ class MockTCPServer:
             except OSError:
                 break
 
-    def get_endpoint(self):
-        """Get the server endpoint as host:port string."""
-        return f"{self.host}:{self.port}"
 
-
-class TestTCPConnection(unittest.TestCase):
-    """Unit tests for TCP connection functionality."""
+class TestXYScreensTCP(unittest.TestCase):
+    """Unit tests for XYScreensTCP class."""
 
     def setUp(self):
         """Set up test fixtures."""
@@ -82,83 +76,32 @@ class TestTCPConnection(unittest.TestCase):
         self.down_duration = 30.0
         self.up_duration = 25.0
 
-    def test_is_tcp_connection_detection(self):
-        """Test TCP connection detection."""
-        # TCP connections
-        screen_tcp = XYScreens("192.168.1.100:9997", self.address, self.down_duration)
-        self.assertTrue(screen_tcp.is_tcp_connection)
-
-        screen_tcp2 = XYScreens("localhost:8080", self.address, self.down_duration)
-        self.assertTrue(screen_tcp2.is_tcp_connection)
-
-        # Serial connections
-        screen_serial = XYScreens("/dev/ttyUSB0", self.address, self.down_duration)
-        self.assertFalse(screen_serial.is_tcp_connection)
-
-        screen_serial2 = XYScreens("COM1", self.address, self.down_duration)
-        self.assertFalse(screen_serial2.is_tcp_connection)
-
-        # Edge cases
-        screen_serial3 = XYScreens("/dev/tty:with:colons", self.address, self.down_duration)
-        self.assertFalse(screen_serial3.is_tcp_connection)  # Starts with /
-
-    def test_parse_tcp_endpoint(self):
-        """Test TCP endpoint parsing."""
-        screen = XYScreens("192.168.1.100:9997", self.address, self.down_duration)
-        host, port = screen._parse_tcp_endpoint()
-        self.assertEqual(host, "192.168.1.100")
-        self.assertEqual(port, 9997)
-
-        screen2 = XYScreens("localhost:8080", self.address, self.down_duration)
-        host2, port2 = screen2._parse_tcp_endpoint()
-        self.assertEqual(host2, "localhost")
-        self.assertEqual(port2, 8080)
-
-    def test_parse_tcp_endpoint_invalid(self):
-        """Test TCP endpoint parsing with invalid formats."""
-        screen = XYScreens("/dev/ttyUSB0", self.address, self.down_duration)
-        with self.assertRaises(ValueError):
-            screen._parse_tcp_endpoint()
-
-        screen2 = XYScreens("invalid:port:format", self.address, self.down_duration)
-        with self.assertRaises(ValueError):
-            screen2._parse_tcp_endpoint()
-
-        screen3 = XYScreens("host:invalid_port", self.address, self.down_duration)
-        with self.assertRaises(ValueError):
-            screen3._parse_tcp_endpoint()
-
-        screen4 = XYScreens("host:99999", self.address, self.down_duration)
-        with self.assertRaises(ValueError):
-            screen4._parse_tcp_endpoint()
-
-    def test_create_tcp_classmethod(self):
-        """Test the create_tcp class method."""
-        screen = XYScreens.create_tcp(
-            "192.168.1.100", 9997, self.address, self.down_duration, self.up_duration
-        )
-        self.assertTrue(screen.is_tcp_connection)
+    def test_constructor(self):
+        """Test XYScreensTCP constructor stores host and port."""
+        screen = XYScreensTCP("192.168.1.100", 9997, self.address, self.down_duration)
+        self.assertEqual(screen.host, "192.168.1.100")
+        self.assertEqual(screen.port, 9997)
         self.assertEqual(screen.device, "192.168.1.100:9997")
-        self.assertEqual(screen.serial_port, "192.168.1.100:9997")  # Backward compatibility
 
-    def test_create_serial_classmethod(self):
-        """Test the create_serial class method."""
-        screen = XYScreens.create_serial(
-            "/dev/ttyUSB0", self.address, self.down_duration, self.up_duration
+    def test_constructor_with_all_args(self):
+        """Test XYScreensTCP constructor with all arguments."""
+        screen = XYScreensTCP(
+            "192.168.1.100", 9997, self.address, self.down_duration, self.up_duration, 50.0
         )
-        self.assertFalse(screen.is_tcp_connection)
-        self.assertEqual(screen.device, "/dev/ttyUSB0")
-        self.assertEqual(screen.serial_port, "/dev/ttyUSB0")
+        self.assertEqual(screen.host, "192.168.1.100")
+        self.assertEqual(screen.port, 9997)
+        self.assertEqual(screen.device, "192.168.1.100:9997")
+        self.assertIs(XYScreensState.STOPPED, screen.state())
 
-    def test_tcp_send_command_with_mock_server(self):
+    def test_send_command_with_mock_server(self):
         """Test sending command via TCP with a mock server."""
         server = MockTCPServer()
         server.start()
 
         try:
-            screen = XYScreens(server.get_endpoint(), self.address, self.down_duration)
+            screen = XYScreensTCP(server.host, server.port, self.address, self.down_duration)
 
-            result = screen._send_command_tcp(screen._commands.up)
+            result = screen._send_command(screen._commands.up)
             self.assertTrue(result)
 
             time.sleep(0.1)
@@ -168,27 +111,27 @@ class TestTCPConnection(unittest.TestCase):
         finally:
             server.stop()
 
-    def test_tcp_send_command_connection_error(self):
+    def test_send_command_connection_error(self):
         """Test TCP connection error handling."""
-        screen = XYScreens("127.0.0.1:99999", self.address, self.down_duration)
+        screen = XYScreensTCP("127.0.0.1", 1, self.address, self.down_duration)
 
         with self.assertRaises(XYScreensConnectionError) as cm:
-            screen._send_command_tcp(screen._commands.up)
+            screen._send_command(screen._commands.up)
 
         self.assertIn("Error while connecting to TCP endpoint", str(cm.exception))
 
-    def test_tcp_send_command_invalid_endpoint(self):
-        """Test TCP command sending with invalid endpoint format."""
-        screen = XYScreens("invalid:endpoint:format", self.address, self.down_duration)
+    def test_constructor_rejects_invalid_port(self):
+        """Test that invalid port values are rejected at construction."""
+        with self.assertRaises(AssertionError):
+            XYScreensTCP("127.0.0.1", 99999, self.address, self.down_duration)
+        with self.assertRaises(AssertionError):
+            XYScreensTCP("127.0.0.1", 0, self.address, self.down_duration)
+        with self.assertRaises(AssertionError):
+            XYScreensTCP("127.0.0.1", -1, self.address, self.down_duration)
 
-        with self.assertRaises(XYScreensConnectionError) as cm:
-            screen._send_command_tcp(screen._commands.up)
 
-        self.assertIn("Error while connecting to TCP endpoint", str(cm.exception))
-
-
-class TestTCPConnectionAsync(unittest.IsolatedAsyncioTestCase):
-    """Unit tests for async TCP connection functionality."""
+class TestXYScreensTCPAsync(unittest.IsolatedAsyncioTestCase):
+    """Unit tests for async XYScreensTCP functionality."""
 
     def setUp(self):
         """Set up test fixtures."""
@@ -196,15 +139,15 @@ class TestTCPConnectionAsync(unittest.IsolatedAsyncioTestCase):
         self.down_duration = 30.0
         self.up_duration = 25.0
 
-    async def test_async_tcp_send_command_with_mock_server(self):
+    async def test_async_send_command_with_mock_server(self):
         """Test sending command via TCP asynchronously with a mock server."""
         server = MockTCPServer()
         server.start()
 
         try:
-            screen = XYScreens(server.get_endpoint(), self.address, self.down_duration)
+            screen = XYScreensTCP(server.host, server.port, self.address, self.down_duration)
 
-            result = await screen._async_send_command_tcp(screen._commands.down)
+            result = await screen._async_send_command(screen._commands.down)
             self.assertTrue(result)
 
             await asyncio.sleep(0.1)
@@ -214,21 +157,22 @@ class TestTCPConnectionAsync(unittest.IsolatedAsyncioTestCase):
         finally:
             server.stop()
 
-    async def test_async_tcp_send_command_connection_error(self):
+    async def test_async_send_command_connection_error(self):
         """Test async TCP connection error handling."""
-        screen = XYScreens("127.0.0.1:99999", self.address, self.down_duration)
+        screen = XYScreensTCP("127.0.0.1", 1, self.address, self.down_duration)
+
 
         with self.assertRaises(XYScreensConnectionError) as cm:
-            await screen._async_send_command_tcp(screen._commands.stop)
+            await screen._async_send_command(screen._commands.stop)
 
         self.assertIn("Error while connecting to TCP endpoint", str(cm.exception))
 
-    async def test_async_tcp_send_command_timeout(self):
+    async def test_async_send_command_timeout(self):
         """Test async TCP connection timeout handling."""
-        screen = XYScreens("192.0.2.1:9999", self.address, self.down_duration)
+        screen = XYScreensTCP("192.0.2.1", 9999, self.address, self.down_duration)
 
         with self.assertRaises(XYScreensConnectionError) as cm:
-            await screen._async_send_command_tcp(screen._commands.program)
+            await screen._async_send_command(screen._commands.program)
 
         self.assertIn("Error while connecting to TCP endpoint", str(cm.exception))
 
@@ -238,7 +182,9 @@ class TestTCPConnectionAsync(unittest.IsolatedAsyncioTestCase):
         server.start()
 
         try:
-            screen = XYScreens(server.get_endpoint(), self.address, self.down_duration, position=50.0)
+            screen = XYScreensTCP(
+                server.host, server.port, self.address, self.down_duration, position=50.0
+            )
 
             result = await screen.async_up()
             self.assertTrue(result)
@@ -250,8 +196,8 @@ class TestTCPConnectionAsync(unittest.IsolatedAsyncioTestCase):
             server.stop()
 
 
-class TestMixedConnections(unittest.TestCase):
-    """Test mixed serial and TCP connection scenarios."""
+class TestSerialConnection(unittest.TestCase):
+    """Test that XYScreens serial class works correctly."""
 
     def setUp(self):
         """Set up test fixtures."""
@@ -259,8 +205,8 @@ class TestMixedConnections(unittest.TestCase):
         self.down_duration = 30.0
 
     @patch('serial.Serial')
-    def test_send_command_routes_to_serial(self, mock_serial):
-        """Test that _send_command routes to serial for serial connections."""
+    def test_send_command_uses_serial(self, mock_serial):
+        """Test that XYScreens._send_command uses serial transport."""
         mock_connection = Mock()
         mock_connection.is_open = False
         mock_serial.return_value = mock_connection
@@ -272,20 +218,11 @@ class TestMixedConnections(unittest.TestCase):
         mock_connection.open.assert_called_once()
         mock_connection.write.assert_called_once()
 
-    @patch('socket.socket')
-    def test_send_command_routes_to_tcp(self, mock_socket_cls):
-        """Test that _send_command routes to TCP for TCP connections."""
-        mock_sock = Mock()
-        mock_sock.__enter__ = Mock(return_value=mock_sock)
-        mock_sock.__exit__ = Mock(return_value=False)
-        mock_socket_cls.return_value = mock_sock
-
-        screen = XYScreens("192.168.1.100:9997", self.address, self.down_duration)
-        screen._send_command(screen._commands.down)
-
-        mock_socket_cls.assert_called_once_with(socket.AF_INET, socket.SOCK_STREAM)
-        mock_sock.connect.assert_called_once_with(("192.168.1.100", 9997))
-        mock_sock.sendall.assert_called_once()
+    def test_serial_port_property(self):
+        """Test that XYScreens.serial_port returns the serial port."""
+        screen = XYScreens.__new__(XYScreens)
+        screen._connection_endpoint = "/dev/ttyUSB0"
+        self.assertEqual(screen.serial_port, "/dev/ttyUSB0")
 
 
 if __name__ == "__main__":
