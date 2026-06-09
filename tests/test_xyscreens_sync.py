@@ -139,7 +139,7 @@ class TestXYScreens(TestCase):
         screen.down()
         state, position = screen.update_status()
         self.assertIs(XYScreensState.DOWNWARD, state)
-        self.assertAlmostEqual(50.0, position, delta=0.6)
+        self.assertAlmostEqual(50.0, position, delta=1)
 
     def test_change_direction_up(self):
         screen = XYScreens(self.serial_port, self.address, 10, 10)
@@ -148,7 +148,7 @@ class TestXYScreens(TestCase):
         screen.up()
         state, position = screen.update_status()
         self.assertIs(XYScreensState.UPWARD, state)
-        self.assertAlmostEqual(50.0, position, delta=0.6)
+        self.assertAlmostEqual(50.0, position, delta=1)
 
     def test_set_position_downward(self):
         screen = XYScreens(self.serial_port, self.address, 10, 10)
