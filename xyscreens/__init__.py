@@ -17,8 +17,7 @@ import time
 from enum import IntEnum
 from typing import Any
 
-import serial
-import serial_asyncio_fast as serial_asyncio
+import serialx
 
 from .task_helper import save_task_reference
 
@@ -205,15 +204,15 @@ class XYScreens:
     def _send_command(self, command: bytes) -> bool:
         try:
             # Create the connection instance.
-            connection = serial.Serial(
+            connection = serialx.Serial(
                 port=self._serial_port,
                 baudrate=2400,
-                bytesize=serial.EIGHTBITS,
-                parity=serial.PARITY_NONE,
-                stopbits=serial.STOPBITS_ONE,
+                bytesize=serialx.EIGHTBITS,
+                parity=serialx.PARITY_NONE,
+                stopbits=serialx.STOPBITS_ONE,
                 timeout=1,
             )
-        except serial.SerialException as ex:
+        except serialx.SerialException as ex:
             raise XYScreensConnectionError(
                 f"Unable to connect to device {self._serial_port}"
             ) from ex
@@ -234,7 +233,7 @@ class XYScreens:
             connection.close()
 
             return True
-        except serial.SerialException as ex:
+        except serialx.SerialException as ex:
             raise XYScreensConnectionError(
                 f"Error while writing to device {self._serial_port}"
             ) from ex
@@ -244,15 +243,15 @@ class XYScreens:
     async def _async_send_command(self, command: bytes) -> bool:
         writer: asyncio.StreamWriter
         try:
-            _, writer = await serial_asyncio.open_serial_connection(
+            _, writer = await serialx.open_serial_connection(
                 url=self._serial_port,
                 baudrate=2400,
-                bytesize=serial.EIGHTBITS,
-                parity=serial.PARITY_NONE,
-                stopbits=serial.STOPBITS_ONE,
+                bytesize=serialx.EIGHTBITS,
+                parity=serialx.PARITY_NONE,
+                stopbits=serialx.STOPBITS_ONE,
                 timeout=1,
             )
-        except serial.SerialException as ex:
+        except serialx.SerialException as ex:
             raise XYScreensConnectionError(
                 f"Unable to connect to device {self._serial_port}"
             ) from ex
@@ -270,7 +269,7 @@ class XYScreens:
             await writer.wait_closed()
 
             return True
-        except serial.SerialException as ex:
+        except serialx.SerialException as ex:
             raise XYScreensConnectionError(
                 f"Error while writing to device {self._serial_port}"
             ) from ex
