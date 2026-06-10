@@ -5,6 +5,7 @@
 
 import json
 import time
+from pathlib import Path
 from unittest import TestCase
 
 from xyscreens import XYScreens, XYScreensState
@@ -70,6 +71,10 @@ class TestXYScreens(TestCase):
             60,
             position=100.00001,
         )
+
+    def test_test_connection(self):
+        screen = XYScreens(self.serial_port, self.address, 60, 60)
+        self.assertTrue(screen.test_connection())
 
     def test_down(self):
         screen = XYScreens(self.serial_port, self.address, 60, 60)

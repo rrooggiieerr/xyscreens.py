@@ -201,7 +201,13 @@ class XYScreens:
 
         self._callbacks.append(callback)
 
-    def _send_command(self, command: bytes) -> bool:
+    def test_connection(self):
+        return self._send_command(None)
+
+    async def async_test_connection(self):
+        return await self._async_send_command(None)
+
+    def _send_command(self, command: bytes | None) -> bool:
         try:
             # Create the connection instance.
             connection = serialx.Serial(
@@ -212,6 +218,10 @@ class XYScreens:
                 stopbits=serialx.STOPBITS_ONE,
                 timeout=1,
             )
+
+            # Open the connection.
+            if not connection.is_open:
+                connection.open()
         except serialx.SerialException as ex:
             raise XYScreensConnectionError(
                 f"Unable to connect to device {self._serial_port}"
@@ -219,15 +229,12 @@ class XYScreens:
         logger.debug("Device %s connected", self._serial_port)
 
         try:
-            # Open the connection.
-            if not connection.is_open:
-                connection.open()
-
-            # Send the command.
-            logger.debug("Sending: 0x%s", command.hex())
-            connection.write(command)
-            connection.flush()
-            logger.info("Command successfully sent")
+            if command is not None:
+                # Send the command.
+                logger.debug("Sending: 0x%s", command.hex())
+                connection.write(command)
+                connection.flush()
+                logger.info("Command successfully sent")
 
             # Close the connection.
             connection.close()
@@ -240,7 +247,7 @@ class XYScreens:
 
         return False
 
-    async def _async_send_command(self, command: bytes) -> bool:
+    async def _async_send_command(self, command: bytes | None) -> bool:
         writer: asyncio.StreamWriter
         try:
             _, writer = await serialx.open_serial_connection(
@@ -257,16 +264,17 @@ class XYScreens:
             ) from ex
         logger.debug("Device %s connected", self._serial_port)
 
-        try:
-            # Send the command.
-            logger.debug("Sending: 0x%s", command.hex())
-            writer.write(command)
-            await writer.drain()
-            logger.info("Command successfully sent")
-        except serialx.SerialException as ex:
-            raise XYScreensConnectionError(
-                f"Error while writing to device {self._serial_port}"
-            ) from ex
+        if command is not None:
+            try:
+                # Send the command.
+                logger.debug("Sending: 0x%s", command.hex())
+                writer.write(command)
+                await writer.drain()
+                logger.info("Command successfully sent")
+            except serialx.SerialException as ex:
+                raise XYScreensConnectionError(
+                    f"Error while writing to device {self._serial_port}"
+                ) from ex
 
         try:
             # Close the connection.

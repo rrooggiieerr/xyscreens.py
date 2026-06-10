@@ -26,6 +26,10 @@ class TestXYScreens(IsolatedAsyncioTestCase):
             self.serial_port = settings.get("serial_port")
             self.address = bytes.fromhex(settings.get("address"))
 
+    async def test_async_test_connection(self):
+        screen = XYScreens(self.serial_port, self.address, 5, 5)
+        self.assertTrue(await screen.async_test_connection())
+
     async def test_async_down(self):
         screen = XYScreens(self.serial_port, self.address, 5, 5)
         callback = Mock()
