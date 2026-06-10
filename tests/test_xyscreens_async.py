@@ -7,10 +7,11 @@ import asyncio
 import json
 from unittest import IsolatedAsyncioTestCase
 from unittest.mock import Mock
+from pathlib import Path
 
 from xyscreens import XYScreens, XYScreensState
 
-_SETTINGS_JSON = "settings.json"
+_SETTINGS_JSON = Path(__file__).with_name("settings.json").absolute()
 
 
 class TestXYScreens(IsolatedAsyncioTestCase):

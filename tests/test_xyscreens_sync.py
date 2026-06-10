@@ -9,7 +9,7 @@ from unittest import TestCase
 
 from xyscreens import XYScreens, XYScreensState
 
-_SETTINGS_JSON = "settings.json"
+_SETTINGS_JSON = Path(__file__).with_name("settings.json").absolute()
 
 
 class TestXYScreens(TestCase):
