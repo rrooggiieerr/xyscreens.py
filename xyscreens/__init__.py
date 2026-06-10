@@ -263,15 +263,23 @@ class XYScreens:
             writer.write(command)
             await writer.drain()
             logger.info("Command successfully sent")
+        except serialx.SerialException as ex:
+            raise XYScreensConnectionError(
+                f"Error while writing to device {self._serial_port}"
+            ) from ex
 
+        try:
             # Close the connection.
             writer.close()
             await writer.wait_closed()
 
             return True
-        except serialx.SerialException as ex:
+        except OSError as ex:
+            if ex.errno == 5:
+                return True
+
             raise XYScreensConnectionError(
-                f"Error while writing to device {self._serial_port}"
+                f"Error while disconnecting from device {self._serial_port}"
             ) from ex
 
         return False
