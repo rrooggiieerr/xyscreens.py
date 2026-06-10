@@ -30,6 +30,10 @@ class TestXYScreens(IsolatedAsyncioTestCase):
         screen = XYScreens(self.serial_port, self.address, 5, 5)
         self.assertTrue(await screen.async_test_connection())
 
+    async def test_async_test_connection_non_existing_port(self):
+        screen = XYScreens("/dev/cu.non_existing_port", self.address, 5, 5)
+        self.assertFalse(await screen.async_test_connection())
+
     async def test_async_down(self):
         screen = XYScreens(self.serial_port, self.address, 5, 5)
         callback = Mock()

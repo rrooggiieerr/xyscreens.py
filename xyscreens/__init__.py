@@ -202,10 +202,20 @@ class XYScreens:
         self._callbacks.append(callback)
 
     def test_connection(self):
-        return self._send_command(None)
+        try:
+            return self._send_command(None)
+        except XYScreensConnectionError:
+            pass
+
+        return False
 
     async def async_test_connection(self):
-        return await self._async_send_command(None)
+        try:
+            return await self._async_send_command(None)
+        except XYScreensConnectionError:
+            pass
+
+        return False
 
     def _send_command(self, command: bytes | None) -> bool:
         try:
@@ -222,6 +232,10 @@ class XYScreens:
             # Open the connection.
             if not connection.is_open:
                 connection.open()
+        except FileNotFoundError as ex:
+            raise XYScreensConnectionError(
+                f"Port {self._serial_port} not found"
+            ) from ex
         except serialx.SerialException as ex:
             raise XYScreensConnectionError(
                 f"Unable to connect to device {self._serial_port}"
@@ -258,6 +272,10 @@ class XYScreens:
                 stopbits=serialx.STOPBITS_ONE,
                 timeout=1,
             )
+        except FileNotFoundError as ex:
+            raise XYScreensConnectionError(
+                f"Port {self._serial_port} not found"
+            ) from ex
         except serialx.SerialException as ex:
             raise XYScreensConnectionError(
                 f"Unable to connect to device {self._serial_port}"

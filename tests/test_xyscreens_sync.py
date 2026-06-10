@@ -76,6 +76,10 @@ class TestXYScreens(TestCase):
         screen = XYScreens(self.serial_port, self.address, 60, 60)
         self.assertTrue(screen.test_connection())
 
+    def test_test_connection_non_existing_port(self):
+        screen = XYScreens("/dev/cu.non_existing_port", self.address, 60, 60)
+        self.assertFalse(screen.test_connection())
+
     def test_down(self):
         screen = XYScreens(self.serial_port, self.address, 60, 60)
         self.assertTrue(screen.down())
