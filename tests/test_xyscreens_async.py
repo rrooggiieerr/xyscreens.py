@@ -5,9 +5,9 @@
 
 import asyncio
 import json
+from pathlib import Path
 from unittest import IsolatedAsyncioTestCase
 from unittest.mock import Mock
-from pathlib import Path
 
 from xyscreens import XYScreens, XYScreensState
 
