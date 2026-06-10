@@ -17,7 +17,7 @@ serial and RS-485 interface.
 This Python library was first implemented for XY Screens. After I was informed that the See Max
 devices use a very similar protocol support, for these devices has been added.
 
-[XY Screens](https://www.xyscreen.com/) and See Max are OEM manufacturers of projector screens and
+[XY Screens](https://www.xyscreen.com/) and [See Max](https://seemaxscreen.com/) are OEM manufacturers of projector screens and
 lifts. Their devices are sold around the world under various brand names.
 
 ## Features
@@ -92,9 +92,6 @@ _See Max_:
 - Lumien
 - Celexon
 
-Please let me know if your projector screen or projector lift works with this Python library so I
-can improve the overview of supported projector screens and lifts.
-
 ## Installation
 
 You can install the Python XY Screens library using the Python package manager pip:
@@ -133,17 +130,33 @@ You can add the `--debug` flag to any CLI command to get more details on what’
 
 `python3 -m xyscreens <serial port> <address> down <duration> --debug`
 
-## Support my work
+## Contribution and appreciation
 
-Do you enjoy using this Python library? Then consider supporting my work using one of the following
-platforms, your donation is greatly appreciated and keeps me motivated:
+Do you enjoy using this Python library? You can contribute or show your appreciation, in the
+following ways.
+
+### Contribute your projector screen brand and model
+
+Is your projector screen supported by this Python library but not listed under *Supported projector screens and lifts*?
+Let me know your projector screen brand and model so I can improve the overview of supported
+projector screens and lifts.
+
+
+### Star this GitHub page
+Help other projector screen users find this Python library by starring this GitHub page. Click ⭐
+Star on the top right of the GitHub page.
+
+### Support my work
+
+Please consider supporting my work through one of the following platforms. Your contribution is
+greatly appreciated and keeps me motivated:
 
 [![GitHub Sponsors][github-shield]][github]
 [![PayPal][paypal-shield]][paypal]
 [![BuyMeCoffee][buymecoffee-shield]][buymecoffee]
 [![Patreon][patreon-shield]][patreon]
 
-## Hire me
+### Hire me
 
 If you're in need for a freelance Python developer for your project please contact me, you can find
 my email address on [my GitHub profile](https://github.com/rrooggiieerr).
