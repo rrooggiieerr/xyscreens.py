@@ -30,7 +30,7 @@ classifiers = [
     "Topic :: Home Automation"
 ]
 dependencies = [
-    "serialx>=1.8.0"
+    "serialx>=1.8.1"
 ]
 
 [project.urls]
