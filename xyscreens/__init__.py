@@ -236,12 +236,8 @@ class XYScreens:
                 connection.open()
 
             logger.debug("Device %s connected", self._url)
-        except FileNotFoundError as ex:
-            raise XYScreensConnectionError(f"Port {self._url} not found") from ex
-        except serialx.SerialException as ex:
-            raise XYScreensConnectionError(
-                f"Unable to connect to device {self._url}"
-            ) from ex
+        except (OSError, serialx.SerialException) as ex:
+            raise XYScreensConnectionError() from ex
 
         if command is not None:
             try:
@@ -250,20 +246,16 @@ class XYScreens:
                 connection.write(command)
                 connection.flush()
                 logger.info("Command successfully sent")
-            except serialx.SerialException as ex:
-                raise XYScreensConnectionError(
-                    f"Error while writing to device {self._url}"
-                ) from ex
+            except (OSError, serialx.SerialException) as ex:
+                raise XYScreensConnectionError() from ex
 
         try:
             # Close the connection.
             connection.close()
 
             return True
-        except serialx.SerialException as ex:
-            raise XYScreensConnectionError(
-                f"Error while disconnecting from device {self._url}"
-            ) from ex
+        except (OSError, serialx.SerialException) as ex:
+            raise XYScreensConnectionError() from ex
 
         return False
 
@@ -283,12 +275,8 @@ class XYScreens:
                 await connection.open()
 
             logger.debug("Device %s connected", self._url)
-        except FileNotFoundError as ex:
-            raise XYScreensConnectionError(f"Port {self._url} not found") from ex
-        except serialx.SerialException as ex:
-            raise XYScreensConnectionError(
-                f"Unable to connect to device {self._url}"
-            ) from ex
+        except (OSError, serialx.SerialException) as ex:
+            raise XYScreensConnectionError() from ex
 
         if command is not None:
             try:
@@ -296,10 +284,8 @@ class XYScreens:
                 logger.debug("Sending: 0x%s", command.hex())
                 await connection.write(command)
                 logger.info("Command successfully sent")
-            except serialx.SerialException as ex:
-                raise XYScreensConnectionError(
-                    f"Error while writing to device {self._url}"
-                ) from ex
+            except (OSError, serialx.SerialException) as ex:
+                raise XYScreensConnectionError() from ex
 
         try:
             # Close the connection.
@@ -307,12 +293,12 @@ class XYScreens:
 
             return True
         except OSError as ex:
-            if ex.errno == 5:
-                return True
-
-            raise XYScreensConnectionError(
-                f"Error while disconnecting from device {self._url}"
-            ) from ex
+            if ex.errno != 5:
+                raise XYScreensConnectionError(
+                    f"Error while disconnecting from device {self._url}"
+                ) from ex
+        except (TimeoutError, serialx.SerialException) as ex:
+            raise XYScreensConnectionError() from ex
 
         return False
 
