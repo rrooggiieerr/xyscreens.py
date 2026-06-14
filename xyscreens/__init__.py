@@ -237,9 +237,7 @@ class XYScreens:
 
             logger.debug("Device %s connected", self._url)
         except FileNotFoundError as ex:
-            raise XYScreensConnectionError(
-                f"Port {self._url} not found"
-            ) from ex
+            raise XYScreensConnectionError(f"Port {self._url} not found") from ex
         except serialx.SerialException as ex:
             raise XYScreensConnectionError(
                 f"Unable to connect to device {self._url}"
@@ -286,9 +284,7 @@ class XYScreens:
 
             logger.debug("Device %s connected", self._url)
         except FileNotFoundError as ex:
-            raise XYScreensConnectionError(
-                f"Port {self._url} not found"
-            ) from ex
+            raise XYScreensConnectionError(f"Port {self._url} not found") from ex
         except serialx.SerialException as ex:
             raise XYScreensConnectionError(
                 f"Unable to connect to device {self._url}"

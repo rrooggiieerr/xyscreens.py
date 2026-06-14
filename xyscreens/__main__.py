@@ -74,7 +74,9 @@ async def main(url: str, address: bytes, wait: int, action: str) -> None:
 if __name__ == "__main__":
     # Read command line arguments
     argparser = argparse.ArgumentParser()
-    argparser.add_argument("url", help="URL (e.g., /dev/ttyUSB0, COM3, socket://127.0.0.1:23)")
+    argparser.add_argument(
+        "url", help="URL (e.g., /dev/ttyUSB0, COM3, socket://127.0.0.1:23)"
+    )
     argparser.add_argument(
         "address", help="Device address in hexadecimal (e.g., AAEEEE)"
     )
@@ -104,8 +106,6 @@ if __name__ == "__main__":
 
     loop = asyncio.new_event_loop()
     try:
-        asyncio.run(
-            main(args.url, bytes.fromhex(args.address), args.wait, args.action)
-        )
+        asyncio.run(main(args.url, bytes.fromhex(args.address), args.wait, args.action))
     finally:
         loop.close()
