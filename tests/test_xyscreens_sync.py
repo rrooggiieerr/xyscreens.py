@@ -80,6 +80,26 @@ class TestXYScreens(TestCase):
         screen = XYScreens("/dev/cu.non_existing_port", self._address, 60, 60)
         self.assertFalse(screen.test_connection())
 
+    def test_test_connection_socket_non_existing_ip(self):
+        screen = XYScreens("socket://0.0.0.0:23", self._address, 5, 5)
+        self.assertFalse(screen.test_connection())
+
+    def test_test_connection_esphome_non_existing_ip(self):
+        screen = XYScreens(
+            "esphome://0.0.0.0:6053/?port_name=UART1", self._address, 5, 5
+        )
+        self.assertFalse(screen.test_connection())
+
+    def test_test_connection_socket_non_existing_host(self):
+        screen = XYScreens("socket://non_existing_host:23", self._address, 5, 5)
+        self.assertFalse(screen.test_connection())
+
+    def test_test_connection_esphome_non_existing_host(self):
+        screen = XYScreens(
+            "esphome://non_existing_host:6053/?port_name=UART1", self._address, 5, 5
+        )
+        self.assertFalse(screen.test_connection())
+
     def test_down(self):
         screen = XYScreens(self._url, self._address, 60, 60)
         self.assertTrue(screen.down())
