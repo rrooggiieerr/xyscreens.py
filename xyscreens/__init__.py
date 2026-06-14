@@ -203,6 +203,9 @@ class XYScreens:
         self._callbacks.append(callback)
 
     def test_connection(self) -> bool:
+        """
+        Test if a connection can be established.
+        """
         try:
             return self._send_command(None)
         except XYScreensConnectionError:
@@ -211,6 +214,9 @@ class XYScreens:
         return False
 
     async def async_test_connection(self) -> bool:
+        """
+        Test if a connection can be established.
+        """
         try:
             return await self._async_send_command(None)
         except XYScreensConnectionError:
