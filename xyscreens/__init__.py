@@ -228,36 +228,22 @@ class XYScreens:
         connection = None
         try:
             # Create the connection instance.
-            connection = serialx.serial_for_url(
+            with serialx.serial_for_url(
                 self._url,
                 baudrate=2400,
                 byte_size=8,
                 parity=Parity.NONE,
                 stopbits=StopBits.ONE,
                 write_timeout=1,
-            )
+            ) as connection:
+                logger.debug("Device %s connected", self._url)
 
-            # Open the connection.
-            if not connection.is_open:
-                connection.open()
-
-            logger.debug("Device %s connected", self._url)
-        except (OSError, serialx.SerialException) as ex:
-            raise XYScreensConnectionError() from ex
-
-        if command is not None:
-            try:
-                # Send the command.
-                logger.debug("Sending: 0x%s", command.hex())
-                connection.write(command)
-                connection.flush()
-                logger.info("Command successfully sent")
-            except (OSError, serialx.SerialException) as ex:
-                raise XYScreensConnectionError() from ex
-
-        try:
-            # Close the connection.
-            connection.close()
+                if command is not None:
+                    # Send the command.
+                    logger.debug("Sending: 0x%s", command.hex())
+                    connection.write(command)
+                    connection.flush()
+                    logger.debug("Command successfully sent")
 
             return True
         except (OSError, serialx.SerialException) as ex:
@@ -267,43 +253,24 @@ class XYScreens:
 
     async def _async_send_command(self, command: bytes | None) -> bool:
         try:
-            connection = serialx.async_serial_for_url(
+            async with serialx.async_serial_for_url(
                 self._url,
                 baudrate=2400,
                 byte_size=8,
                 parity=Parity.NONE,
                 stopbits=StopBits.ONE,
                 write_timeout=1,
-            )
+            ) as connection:
+                logger.debug("Device %s connected", self._url)
 
-            # Open the connection.
-            if not connection.is_open:
-                await connection.open()
-
-            logger.debug("Device %s connected", self._url)
-        except (OSError, serialx.SerialException) as ex:
-            raise XYScreensConnectionError() from ex
-
-        if command is not None:
-            try:
-                # Send the command.
-                logger.debug("Sending: 0x%s", command.hex())
-                await connection.write(command)
-                logger.info("Command successfully sent")
-            except (OSError, serialx.SerialException) as ex:
-                raise XYScreensConnectionError() from ex
-
-        try:
-            # Close the connection.
-            await connection.close()
+                if command is not None:
+                    # Send the command.
+                    logger.debug("Sending: 0x%s", command.hex())
+                    await connection.write(command)
+                    logger.debug("Command successfully sent")
 
             return True
-        except OSError as ex:
-            if ex.errno != 5:
-                raise XYScreensConnectionError(
-                    f"Error while disconnecting from device {self._url}"
-                ) from ex
-        except (TimeoutError, serialx.SerialException) as ex:
+        except (OSError, serialx.SerialException) as ex:
             raise XYScreensConnectionError() from ex
 
         return False
