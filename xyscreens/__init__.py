@@ -108,7 +108,7 @@ class XYScreens:
 
     # pylint: disable=too-many-instance-attributes
     # The URL to the RS-485 interface where the screen is connected to.
-    _url: str | None = None
+    _url: str
     # The amount of time in seconds it takes the screen to close from the fully-open state.
     _up_duration: float
     # The amount of time in seconds it takes the screen to open up from the fully-closed state.
@@ -202,7 +202,7 @@ class XYScreens:
 
         self._callbacks.append(callback)
 
-    def test_connection(self):
+    def test_connection(self) -> bool:
         try:
             return self._send_command(None)
         except XYScreensConnectionError:
@@ -210,7 +210,7 @@ class XYScreens:
 
         return False
 
-    async def async_test_connection(self):
+    async def async_test_connection(self) -> bool:
         try:
             return await self._async_send_command(None)
         except XYScreensConnectionError:

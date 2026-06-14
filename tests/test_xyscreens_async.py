@@ -17,8 +17,8 @@ _SETTINGS_JSON = Path(__file__).with_name("settings.json").absolute()
 class TestXYScreens(IsolatedAsyncioTestCase):
     """Asynchronous unit test for the XYScreens library"""
 
-    _url: str | None = None
-    _address: bytes | None = None
+    _url: str
+    _address: bytes
 
     async def asyncSetUp(self):
         with open(_SETTINGS_JSON, encoding="utf8") as settings_file:
