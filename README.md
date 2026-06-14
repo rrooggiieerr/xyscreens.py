@@ -56,7 +56,7 @@ See the documentation of your specific projector screen or lift on how to wire y
 ### Serial to USB adapter
 
 If your projector screen or lift has a serial port exposed use a Serial to USB adapter to connect
-thes creen.
+the projector screen or lift.
 
 See the documentation of your specific projector screen or lift on how to wire yours correctly.
 
@@ -84,7 +84,7 @@ You can connect a MAX485 transceiver module to an ESP32 and install
 
 Use `esphome://<ip address>:<port>/?port_name=<port name>` as the URL to connect to the ESPHome Serial Proxy.
 
-## Protocol
+## Supported protocol
 
 If your device follows the following protocol it is supported by this Python library:
 
@@ -174,7 +174,6 @@ following ways.
 Is your projector screen supported by this Python library but not listed under *Supported projector screens and lifts*?
 Let me know your projector screen brand and model so I can improve the overview of supported
 projector screens and lifts.
-
 
 ### Star this GitHub page
 Help other projector screen users find this Python library by starring this GitHub page. Click ⭐
