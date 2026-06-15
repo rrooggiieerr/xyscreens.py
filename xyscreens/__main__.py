@@ -20,7 +20,7 @@ def _print_status(state: XYScreensState, position: float):
         print(f"{state!s:8}: {position:5.1f} %", end="\r")
 
 
-async def main(port: str, address: bytes, wait: int, action: str) -> None:
+async def main(url: str, address: bytes, wait: int, action: str) -> None:
     """Execute the main CLI logic for controlling XY Screens."""
 
     if wait <= 0:
@@ -30,7 +30,7 @@ async def main(port: str, address: bytes, wait: int, action: str) -> None:
 
     try:
         if action == "up":
-            screen = XYScreens(port, address, down_duration, position=100.0)
+            screen = XYScreens(url, address, down_duration, position=100.0)
             if not await screen.async_up():
                 return
 
@@ -43,7 +43,7 @@ async def main(port: str, address: bytes, wait: int, action: str) -> None:
                     break
                 await asyncio.sleep(0.1)
         elif action == "down":
-            screen = XYScreens(port, address, down_duration, position=0.0)
+            screen = XYScreens(url, address, down_duration, position=0.0)
             if not await screen.async_down():
                 return
 
@@ -56,7 +56,7 @@ async def main(port: str, address: bytes, wait: int, action: str) -> None:
                     break
                 await asyncio.sleep(0.1)
         else:
-            screen = XYScreens(port, address, 1)
+            screen = XYScreens(url, address, 1)
             match action:
                 case "stop":
                     await screen.async_stop()
@@ -74,7 +74,9 @@ async def main(port: str, address: bytes, wait: int, action: str) -> None:
 if __name__ == "__main__":
     # Read command line arguments
     argparser = argparse.ArgumentParser()
-    argparser.add_argument("port", help="Serial port (e.g., /dev/ttyUSB0 or COM3)")
+    argparser.add_argument(
+        "url", help="URL (e.g., /dev/ttyUSB0, COM3, socket://127.0.0.1:23)"
+    )
     argparser.add_argument(
         "address", help="Device address in hexadecimal (e.g., AAEEEE)"
     )
@@ -104,8 +106,6 @@ if __name__ == "__main__":
 
     loop = asyncio.new_event_loop()
     try:
-        asyncio.run(
-            main(args.port, bytes.fromhex(args.address), args.wait, args.action)
-        )
+        asyncio.run(main(args.url, bytes.fromhex(args.address), args.wait, args.action))
     finally:
         loop.close()

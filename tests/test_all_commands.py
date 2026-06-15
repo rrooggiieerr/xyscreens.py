@@ -3,7 +3,7 @@ import unittest
 
 from xyscreens import XYScreens
 
-_SERIAL_PORT = "/dev/tty.wchusbserial110"
+_URL = "/dev/tty.wchusbserial110"
 _ADDRESS = bytes.fromhex("AAEEEE")
 
 
@@ -11,7 +11,7 @@ class TestXYScreens(unittest.IsolatedAsyncioTestCase):
     """Unit test for the XYScreens library"""
 
     async def test_all_commands(self):
-        screen = XYScreens(_SERIAL_PORT, _ADDRESS, 60)
+        screen = XYScreens(_URL, _ADDRESS, 60)
         for i in range(256):
             print(f"Trying command {i.to_bytes(1).hex()}")
             command = b"\xff" + _ADDRESS + i.to_bytes(1)
