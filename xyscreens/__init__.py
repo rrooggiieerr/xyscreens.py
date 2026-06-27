@@ -15,7 +15,7 @@ import asyncio
 import logging
 import time
 from enum import IntEnum
-from typing import Any
+from typing import Any, override
 
 import serialx
 from serialx import Parity, StopBits
@@ -92,6 +92,7 @@ class XYScreensState(IntEnum):
     # Down, stopped and totally extended to the lowest position.
     DOWN = 4
 
+    @override
     def __str__(self) -> str:
         """Human readable states."""
         return {
@@ -249,8 +250,6 @@ class XYScreens:
         except (OSError, serialx.SerialException) as ex:
             raise XYScreensConnectionError() from ex
 
-        return False
-
     async def _async_send_command(self, command: bytes | None) -> bool:
         try:
             async with serialx.async_serial_for_url(
@@ -272,8 +271,6 @@ class XYScreens:
             return True
         except (OSError, serialx.SerialException) as ex:
             raise XYScreensConnectionError() from ex
-
-        return False
 
     def update_status(self) -> tuple[XYScreensState, float]:
         """
