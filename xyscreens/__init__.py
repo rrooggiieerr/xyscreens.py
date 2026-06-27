@@ -14,6 +14,7 @@ except ModuleNotFoundError:
 import asyncio
 import logging
 import time
+from collections.abc import Callable
 from enum import IntEnum
 from typing import Any, Final, override
 
@@ -194,7 +195,7 @@ class XYScreens:
 
         self._last_recompute_time = time.time_ns()
 
-    def add_callback(self, callback) -> None:
+    def add_callback(self, callback: Callable[[XYScreensState, float], None]) -> None:
         """
         Adds a callback.
         """
