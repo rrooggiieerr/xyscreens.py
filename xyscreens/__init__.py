@@ -15,14 +15,14 @@ import asyncio
 import logging
 import time
 from enum import IntEnum
-from typing import Any, override
+from typing import Any, Final, override
 
 import serialx
 from serialx import Parity, StopBits
 
 from .task_helper import save_task_reference
 
-logger = logging.getLogger(__name__)
+logger: Final = logging.getLogger(__name__)
 
 
 class XYScreensConnectionError(Exception):
