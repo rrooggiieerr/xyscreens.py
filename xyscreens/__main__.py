@@ -13,7 +13,7 @@ from xyscreens import XYScreens, XYScreensState
 _LOGGER = logging.getLogger(__name__)
 
 
-def _print_status(state: XYScreensState, position: float):
+def _print_status(state: XYScreensState, position: float) -> None:
     if _LOGGER.isEnabledFor(logging.DEBUG):
         _LOGGER.info("%-8s: %5.1f %%", state, position)
     else:
