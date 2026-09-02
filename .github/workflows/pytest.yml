@@ -9,6 +9,7 @@ jobs:
     strategy:
       matrix:
         python-version: ["3.12", "3.13", "3.14"]
+    timeout-minutes: 5
 
     steps:
       - uses: actions/checkout@v3
@@ -22,4 +23,3 @@ jobs:
       - name: Install pytest dependencies
         run: pip install pytest pytest-asyncio pytest-md pytest-emoji
       - uses: pavelzw/pytest-action@v2
-        timeout-minutes: 5
