@@ -56,3 +56,6 @@ mypy_path = "xyscreens"
 [[tool.mypy.overrides]]
 module = ["serial.*", "serial_asyncio_fast.*", "*._version"]
 ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
