@@ -1,175 +1,219 @@
 """Asynchronous unit test for the XYScreens library"""
 
 # pylint: disable=missing-function-docstring
-# pylint: disable=too-many-public-methods
 
 import asyncio
-import json
-from pathlib import Path
-from typing import override
-from unittest import IsolatedAsyncioTestCase
-from unittest.mock import Mock
+from collections.abc import Generator
+from socket import gaierror
+from unittest.mock import AsyncMock, Mock, patch
+
+import pytest
+from serialx import SerialException
 
 from xyscreens import XYScreens, XYScreensState
 
-_SETTINGS_JSON = Path(__file__).with_name("settings.json").absolute()
+
+@pytest.fixture()
+def mock_async_serial() -> Generator[AsyncMock, None, None]:
+    """Mock serialx AsyncSerial."""
+
+    with (
+        patch(
+            "serialx.async_serial.AsyncSerial",
+            autospec=True,
+        ) as mock_connection,
+    ):
+        connection = mock_connection.return_value
+        connection.open = AsyncMock()
+
+        yield connection
 
 
-class TestXYScreens(IsolatedAsyncioTestCase):
-    """Asynchronous unit test for the XYScreens library"""
+@pytest.mark.usefixtures("mock_async_serial")
+async def test_async_test_connection():
+    screen = XYScreens("/dev/cu.some_port", b"AAEEEE", 5, 5)
+    assert await screen.async_test_connection() is True
 
-    _url: str
-    _address: bytes
 
-    @override
-    async def asyncSetUp(self):
-        with open(_SETTINGS_JSON, encoding="utf8") as settings_file:
-            settings = json.load(settings_file)
-            self._url = settings.get("url")
-            self._address = bytes.fromhex(settings.get("address"))
+async def test_async_test_connection_non_existing_port():
+    with patch("serialx.async_serial.AsyncSerial.open", side_effect=FileNotFoundError):
+        screen = XYScreens("/dev/cu.non_existing_port", b"AAEEEE", 5, 5)
+        assert await screen.async_test_connection() is False
 
-    async def test_async_test_connection(self):
-        screen = XYScreens(self._url, self._address, 5, 5)
-        self.assertTrue(await screen.async_test_connection())
 
-    async def test_async_test_connection_non_existing_port(self):
-        screen = XYScreens("/dev/cu.non_existing_port", self._address, 5, 5)
-        self.assertFalse(await screen.async_test_connection())
+async def test_async_test_connection_socket_non_existing_ip():
+    with patch(
+        "serialx.async_serial.AsyncSerial.open", side_effect=ConnectionRefusedError
+    ):
+        screen = XYScreens("socket://0.0.0.0:23", b"AAEEEE", 5, 5)
+        assert await screen.async_test_connection() is False
 
-    async def test_async_test_connection_socket_non_existing_ip(self):
-        screen = XYScreens("socket://0.0.0.0:23", self._address, 5, 5)
-        self.assertFalse(await screen.async_test_connection())
 
-    async def test_async_test_connection_esphome_non_existing_ip(self):
+async def test_async_test_connection_esphome_non_existing_ip():
+    with patch("serialx.async_serial.AsyncSerial.open", side_effect=SerialException):
+        screen = XYScreens("esphome://0.0.0.0:6053/?port_name=UART1", b"AAEEEE", 5, 5)
+        assert await screen.async_test_connection() is False
+
+
+async def test_async_test_connection_socket_non_existing_host():
+    with patch("serialx.async_serial.AsyncSerial.open", side_effect=gaierror):
+        screen = XYScreens("socket://non_existing_host:23", b"AAEEEE", 5, 5)
+        assert await screen.async_test_connection() is False
+
+
+async def test_async_test_connection_esphome_non_existing_host():
+    with patch("serialx.async_serial.AsyncSerial.open", side_effect=SerialException):
         screen = XYScreens(
-            "esphome://0.0.0.0:6053/?port_name=UART1", self._address, 5, 5
+            "esphome://non_existing_host:6053/?port_name=UART1", b"AAEEEE", 5, 5
         )
-        self.assertFalse(await screen.async_test_connection())
+        assert await screen.async_test_connection() is False
 
-    async def test_async_test_connection_socket_non_existing_host(self):
-        screen = XYScreens("socket://non_existing_host:23", self._address, 5, 5)
-        self.assertFalse(await screen.async_test_connection())
 
-    async def test_async_test_connection_esphome_non_existing_host(self):
-        screen = XYScreens(
-            "esphome://non_existing_host:6053/?port_name=UART1", self._address, 5, 5
-        )
-        self.assertFalse(await screen.async_test_connection())
+@pytest.mark.usefixtures("mock_async_serial")
+async def test_async_down():
+    screen = XYScreens("/dev/cu.some_port", b"AAEEEE", 5, 5)
+    callback = Mock()
+    screen.add_callback(callback)
+    assert await screen.async_down() is True
+    await asyncio.sleep(5.1)
+    callback.assert_called_with(XYScreensState.DOWN, 100.0)
 
-    async def test_async_down(self):
-        screen = XYScreens(self._url, self._address, 5, 5)
-        callback = Mock()
-        screen.add_callback(callback)
-        self.assertTrue(await screen.async_down())
-        await asyncio.sleep(5.1)
-        callback.assert_called_with(XYScreensState.DOWN, 100.0)
 
-    async def test_async_up(self):
-        screen = XYScreens(self._url, self._address, 5, 5, 100)
-        callback = Mock()
-        screen.add_callback(callback)
-        self.assertTrue(await screen.async_up())
-        await asyncio.sleep(5.1)
-        callback.assert_called_with(XYScreensState.UP, 0.0)
+@pytest.mark.usefixtures("mock_async_serial")
+async def test_async_up():
+    screen = XYScreens("/dev/cu.some_port", b"AAEEEE", 5, 5, 100)
+    callback = Mock()
+    screen.add_callback(callback)
+    assert await screen.async_up() is True
+    await asyncio.sleep(5.1)
+    callback.assert_called_with(XYScreensState.UP, 0.0)
 
-    async def test_async_stop(self):
-        screen = XYScreens(self._url, self._address, 60, 60)
-        await screen.async_down()
-        await asyncio.sleep(1)
-        self.assertTrue(await screen.async_stop())
 
-    async def test_async_state_up(self):
-        screen = XYScreens(self._url, self._address, 10, 10, 100)
-        await screen.async_up()
-        await asyncio.sleep(10.1)
-        self.assertIs(XYScreensState.UP, screen.state())
+@pytest.mark.usefixtures("mock_async_serial")
+async def test_async_stop():
+    screen = XYScreens("/dev/cu.some_port", b"AAEEEE", 60, 60)
+    await screen.async_down()
+    await asyncio.sleep(1)
+    assert await screen.async_stop() is True
 
-    async def test_async_state_closing(self):
-        screen = XYScreens(self._url, self._address, 60, 60, 100)
-        await screen.async_up()
-        self.assertIs(XYScreensState.UPWARD, screen.state())
-        await screen.async_stop()
 
-    async def test_async_state_stopped(self):
-        screen = XYScreens(self._url, self._address, 10, 10)
-        await screen.async_down()
-        await asyncio.sleep(5)
-        await screen.async_stop()
-        self.assertIs(XYScreensState.STOPPED, screen.state())
+@pytest.mark.usefixtures("mock_async_serial")
+async def test_async_state_up():
+    screen = XYScreens("/dev/cu.some_port", b"AAEEEE", 10, 10, 100)
+    await screen.async_up()
+    await asyncio.sleep(10.1)
+    assert screen.state() == XYScreensState.UP
 
-    async def test_async_state_downward(self):
-        screen = XYScreens(self._url, self._address, 10, 10)
-        await screen.async_down()
-        self.assertIs(XYScreensState.DOWNWARD, screen.state())
-        await screen.async_stop()
 
-    async def test_async_state_down(self):
-        screen = XYScreens(self._url, self._address, 10, 10)
-        await screen.async_down()
-        await asyncio.sleep(10.1)
-        self.assertIs(XYScreensState.DOWN, screen.state())
+@pytest.mark.usefixtures("mock_async_serial")
+async def test_async_state_closing():
+    screen = XYScreens("/dev/cu.some_port", b"AAEEEE", 60, 60, 100)
+    await screen.async_up()
+    assert screen.state() == XYScreensState.UPWARD
+    await screen.async_stop()
 
-    async def test_async_position_up(self):
-        screen = XYScreens(self._url, self._address, 10, 10, 100)
-        await screen.async_up()
-        await asyncio.sleep(10.1)
-        self.assertEqual(0.0, screen.position())
 
-    async def test_async_position_down(self):
-        screen = XYScreens(self._url, self._address, 10, 10)
-        await screen.async_down()
-        await asyncio.sleep(10.1)
-        self.assertEqual(100.0, screen.position())
+@pytest.mark.usefixtures("mock_async_serial")
+async def test_async_state_stopped():
+    screen = XYScreens("/dev/cu.some_port", b"AAEEEE", 10, 10)
+    await screen.async_down()
+    await asyncio.sleep(5)
+    await screen.async_stop()
+    assert screen.state() == XYScreensState.STOPPED
 
-    async def test_async_position_halfway(self):
-        screen = XYScreens(self._url, self._address, 10, 10)
-        await screen.async_down()
-        await asyncio.sleep(5)
-        self.assertAlmostEqual(50.0, screen.position(), delta=1)
-        await screen.async_stop()
 
-    async def test_async_change_direction_down(self):
-        screen = XYScreens(self._url, self._address, 10, 10, 100)
-        await screen.async_up()
-        await asyncio.sleep(5)
-        await screen.async_down()
-        state, position = screen.update_status()
-        self.assertIs(XYScreensState.DOWNWARD, state)
-        self.assertAlmostEqual(50.0, position, delta=1)
-        await screen.async_stop()
+@pytest.mark.usefixtures("mock_async_serial")
+async def test_async_state_downward():
+    screen = XYScreens("/dev/cu.some_port", b"AAEEEE", 10, 10)
+    await screen.async_down()
+    assert screen.state() == XYScreensState.DOWNWARD
+    await screen.async_stop()
 
-    async def test_async_change_direction_up(self):
-        screen = XYScreens(self._url, self._address, 10, 10)
-        await screen.async_down()
-        await asyncio.sleep(5)
-        await screen.async_up()
-        state, position = screen.update_status()
-        self.assertIs(XYScreensState.UPWARD, state)
-        self.assertAlmostEqual(50.0, position, delta=1)
-        await screen.async_stop()
 
-    async def test_async_set_position_downward(self):
-        screen = XYScreens(self._url, self._address, 10, 10)
-        await screen.async_set_position(50.0)
-        await asyncio.sleep(5.1)
-        state, position = screen.update_status()
-        self.assertIs(XYScreensState.STOPPED, state)
-        self.assertAlmostEqual(50.0, position, delta=1)
+@pytest.mark.usefixtures("mock_async_serial")
+async def test_async_state_down():
+    screen = XYScreens("/dev/cu.some_port", b"AAEEEE", 10, 10)
+    await screen.async_down()
+    await asyncio.sleep(10.1)
+    assert screen.state() == XYScreensState.DOWN
 
-    async def test_async_set_position_upward(self):
-        screen = XYScreens(self._url, self._address, 10, 10, 100.0)
-        await screen.async_set_position(50.0)
-        await asyncio.sleep(5.1)
-        state, position = screen.update_status()
-        self.assertIs(XYScreensState.STOPPED, state)
-        self.assertAlmostEqual(50.0, position, delta=1)
 
-    async def test_async_set_position_stop(self):
-        """Test stopping the screen while it is moving to a given position."""
-        screen = XYScreens(self._url, self._address, 10, 10)
-        await screen.async_down()
-        await asyncio.sleep(5)
-        await screen.async_stop()
-        state, position = screen.update_status()
-        self.assertIs(XYScreensState.STOPPED, state)
-        self.assertAlmostEqual(50.0, position, delta=1)
+@pytest.mark.usefixtures("mock_async_serial")
+async def test_async_position_up():
+    screen = XYScreens("/dev/cu.some_port", b"AAEEEE", 10, 10, 100)
+    await screen.async_up()
+    await asyncio.sleep(10.1)
+    assert screen.position() == 0.0
+
+
+@pytest.mark.usefixtures("mock_async_serial")
+async def test_async_position_down():
+    screen = XYScreens("/dev/cu.some_port", b"AAEEEE", 10, 10)
+    await screen.async_down()
+    await asyncio.sleep(10.1)
+    assert screen.position() == 100.0
+
+
+@pytest.mark.usefixtures("mock_async_serial")
+async def test_async_position_halfway():
+    screen = XYScreens("/dev/cu.some_port", b"AAEEEE", 10, 10)
+    await screen.async_down()
+    await asyncio.sleep(5)
+    assert screen.position() == pytest.approx(50.0, 1)
+    await screen.async_stop()
+
+
+@pytest.mark.usefixtures("mock_async_serial")
+async def test_async_change_direction_down():
+    screen = XYScreens("/dev/cu.some_port", b"AAEEEE", 10, 10, 100)
+    await screen.async_up()
+    await asyncio.sleep(5)
+    await screen.async_down()
+    state, position = screen.update_status()
+    assert state == XYScreensState.DOWNWARD
+    assert position == pytest.approx(50.0, 1)
+    await screen.async_stop()
+
+
+@pytest.mark.usefixtures("mock_async_serial")
+async def test_async_change_direction_up():
+    screen = XYScreens("/dev/cu.some_port", b"AAEEEE", 10, 10)
+    await screen.async_down()
+    await asyncio.sleep(5)
+    await screen.async_up()
+    state, position = screen.update_status()
+    assert state == XYScreensState.UPWARD
+    assert position == pytest.approx(50.0, 1)
+    await screen.async_stop()
+
+
+@pytest.mark.usefixtures("mock_async_serial")
+async def test_async_set_position_downward():
+    screen = XYScreens("/dev/cu.some_port", b"AAEEEE", 10, 10)
+    await screen.async_set_position(50.0)
+    await asyncio.sleep(5.1)
+    state, position = screen.update_status()
+    assert state == XYScreensState.STOPPED
+    assert position == pytest.approx(50.0, 1)
+
+
+@pytest.mark.usefixtures("mock_async_serial")
+async def test_async_set_position_upward():
+    screen = XYScreens("/dev/cu.some_port", b"AAEEEE", 10, 10, 100.0)
+    await screen.async_set_position(50.0)
+    await asyncio.sleep(5.1)
+    state, position = screen.update_status()
+    assert state == XYScreensState.STOPPED
+    assert position == pytest.approx(50.0, 1)
+
+
+@pytest.mark.usefixtures("mock_async_serial")
+async def test_async_set_position_stop():
+    """Test stopping the screen while it is moving to a given position."""
+    screen = XYScreens("/dev/cu.some_port", b"AAEEEE", 10, 10)
+    await screen.async_down()
+    await asyncio.sleep(5)
+    await screen.async_stop()
+    state, position = screen.update_status()
+    assert state == XYScreensState.STOPPED
+    assert position == pytest.approx(50.0, 1)
