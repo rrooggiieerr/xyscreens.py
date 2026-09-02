@@ -14,15 +14,16 @@ except ModuleNotFoundError:
 import asyncio
 import logging
 import time
+from collections.abc import Callable
 from enum import IntEnum
-from typing import Any
+from typing import Any, Final, override
 
 import serialx
 from serialx import Parity, StopBits
 
 from .task_helper import save_task_reference
 
-logger = logging.getLogger(__name__)
+logger: Final = logging.getLogger(__name__)
 
 
 class XYScreensConnectionError(Exception):
@@ -92,6 +93,7 @@ class XYScreensState(IntEnum):
     # Down, stopped and totally extended to the lowest position.
     DOWN = 4
 
+    @override
     def __str__(self) -> str:
         """Human readable states."""
         return {
@@ -193,7 +195,7 @@ class XYScreens:
 
         self._last_recompute_time = time.time_ns()
 
-    def add_callback(self, callback) -> None:
+    def add_callback(self, callback: Callable[[XYScreensState, float], None]) -> None:
         """
         Adds a callback.
         """
@@ -249,8 +251,6 @@ class XYScreens:
         except (OSError, serialx.SerialException) as ex:
             raise XYScreensConnectionError() from ex
 
-        return False
-
     async def _async_send_command(self, command: bytes | None) -> bool:
         try:
             async with serialx.async_serial_for_url(
@@ -272,8 +272,6 @@ class XYScreens:
             return True
         except (OSError, serialx.SerialException) as ex:
             raise XYScreensConnectionError() from ex
-
-        return False
 
     def update_status(self) -> tuple[XYScreensState, float]:
         """

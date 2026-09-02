@@ -6,6 +6,7 @@
 import json
 import time
 from pathlib import Path
+from typing import override
 from unittest import TestCase
 
 from xyscreens import XYScreens, XYScreensState
@@ -19,6 +20,7 @@ class TestXYScreens(TestCase):
     _url: str
     _address: bytes
 
+    @override
     def setUp(self):
         with open(_SETTINGS_JSON, encoding="utf8") as settings_file:
             settings = json.load(settings_file)

@@ -6,6 +6,7 @@
 import asyncio
 import json
 from pathlib import Path
+from typing import override
 from unittest import IsolatedAsyncioTestCase
 from unittest.mock import Mock
 
@@ -20,6 +21,7 @@ class TestXYScreens(IsolatedAsyncioTestCase):
     _url: str
     _address: bytes
 
+    @override
     async def asyncSetUp(self):
         with open(_SETTINGS_JSON, encoding="utf8") as settings_file:
             settings = json.load(settings_file)
