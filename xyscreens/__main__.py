@@ -90,7 +90,15 @@ if __name__ == "__main__":
     )
     argparser.add_argument(
         "action",
-        choices=["up", "stop", "down", "micro_up", "micro_down", "program", "test_commands"],
+        choices=[
+            "up",
+            "stop",
+            "down",
+            "micro_up",
+            "micro_down",
+            "program",
+            "test_commands",
+        ],
         help="Action to perform",
     )
     argparser.add_argument(
