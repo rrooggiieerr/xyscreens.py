@@ -158,6 +158,13 @@ interface. Each device should have a unique address.
 
 Where `<address>` is the three byte address to be programmed.
 
+### Testing all commands
+
+To test the supported commands of a projector screens you can test each command from `0x00` to
+`0xFF` and see how the device responds.
+
+`python3 -m xyscreens <URL> <address> test_commands`
+
 ### Troubleshooting
 
 You can add the `--debug` flag to any CLI command to get more details on what’s going on. Like so:

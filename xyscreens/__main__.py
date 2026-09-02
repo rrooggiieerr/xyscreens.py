@@ -55,6 +55,14 @@ async def main(url: str, address: bytes, wait: int, action: str) -> None:
                         print()
                     break
                 await asyncio.sleep(0.1)
+        elif action == "test_commands":
+            screen = XYScreens(url, address, 60)
+            for i in range(256):
+                print(f"Trying command 0x{i.to_bytes(1).hex()}")
+                command = b"\xff" + address + i.to_bytes(1)
+                await screen._async_send_command(command)
+                await asyncio.sleep(5)
+                await screen.async_stop()
         else:
             screen = XYScreens(url, address, 1)
             match action:
@@ -82,7 +90,7 @@ if __name__ == "__main__":
     )
     argparser.add_argument(
         "action",
-        choices=["up", "stop", "down", "micro_up", "micro_down", "program"],
+        choices=["up", "stop", "down", "micro_up", "micro_down", "program", "test_commands"],
         help="Action to perform",
     )
     argparser.add_argument(
