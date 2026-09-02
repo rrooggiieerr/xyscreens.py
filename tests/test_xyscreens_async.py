@@ -3,8 +3,8 @@
 # pylint: disable=missing-function-docstring
 
 import asyncio
+from collections.abc import Generator
 from socket import gaierror
-from typing import Generator
 from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
@@ -14,7 +14,7 @@ from xyscreens import XYScreens, XYScreensState
 
 
 @pytest.fixture()
-def mock_async_serial() -> Generator[AsyncMock]:
+def mock_async_serial() -> Generator[AsyncMock, None, None]:
     """Mock serialx AsyncSerial."""
 
     with (

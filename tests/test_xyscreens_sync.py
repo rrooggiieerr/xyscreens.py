@@ -3,8 +3,8 @@
 # pylint: disable=missing-function-docstring
 
 import time
+from collections.abc import Generator
 from socket import gaierror
-from typing import Generator
 from unittest.mock import Mock, patch
 
 import pytest
@@ -14,7 +14,7 @@ from xyscreens import XYScreens, XYScreensState
 
 
 @pytest.fixture(autouse=True)
-def mock_base_serial() -> Generator[Mock]:
+def mock_base_serial() -> Generator[Mock, None, None]:
     """Mock serialx BaseSerial."""
 
     with (
