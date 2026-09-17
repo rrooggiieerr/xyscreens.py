@@ -16,7 +16,7 @@ import logging
 import time
 from collections.abc import Callable
 from enum import IntEnum
-from typing import Any, Final, override
+from typing import Final, override
 
 import serialx
 from serialx import Parity, StopBits
@@ -457,7 +457,7 @@ class XYScreens:
         while True:
             if self._target_position_reached():
                 if self._state in (XYScreensState.UPWARD, XYScreensState.DOWNWARD):
-                    self.stop()
+                    return self.stop()
                 break
 
             time.sleep(sleep_duration)
