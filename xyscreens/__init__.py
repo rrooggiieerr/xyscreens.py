@@ -145,12 +145,16 @@ class XYScreens:
         # pylint: disable=too-many-arguments
 
         # Validate the different arguments.
-        assert url is not None
-        assert down_duration is not None
-        assert down_duration > 0.0
-        assert up_duration is None or up_duration > 0.0
-        assert address is not None
-        assert position >= 0.0
+        if len(address) != 3:
+            raise ValueError("address must contain exactly 3 bytes")
+
+        if down_duration <= 0.0:
+            raise ValueError("down_duration must be greater than 0")
+        if up_duration is not None and up_duration <= 0.0:
+            raise ValueError("up_duration must be greater than 0")
+
+        if not 0.0 <= position <= 100.0:
+            raise ValueError("position must be between 0.0 and 100.0")
 
         self._url = url
         # Set the duration for the screen to go down.
@@ -176,8 +180,8 @@ class XYScreens:
 
         Not to be used to move the screen to a position
         """
-        # Make sure the given screen position is within the range of 0.0% to 100.0%
-        assert 0.0 <= position <= 100.0
+        if not 0.0 <= position <= 100.0:
+            raise ValueError("position must be between 0.0 and 100.0")
 
         self._position = position
 
@@ -290,7 +294,7 @@ class XYScreens:
 
         now = time.time_ns()
         time_delta = now - self._last_recompute_time
-        movement = direction * time_delta / (action_duration * 10000000)
+        movement = direction * time_delta / (action_duration * 10_000_000)
         position = self._position + movement
         self._last_recompute_time = now
 
@@ -433,7 +437,8 @@ class XYScreens:
 
     def set_position(self, target_position: float) -> bool:
         """Initiates the screen to move to a given position."""
-        assert 0.0 <= target_position <= 100.0
+        if not 0.0 <= target_position <= 100.0:
+            raise ValueError("target_position must be between 0.0 and 100.0")
 
         if round(self._position) == round(target_position):
             return self.stop()
@@ -456,7 +461,8 @@ class XYScreens:
 
     async def async_set_position(self, target_position: float) -> bool:
         """Initiates the screen to move to a given position."""
-        assert 0.0 <= target_position <= 100.0
+        if not 0.0 <= target_position <= 100.0:
+            raise ValueError("target_position must be between 0.0 and 100.0")
 
         if round(self._position) == round(target_position):
             return await self.async_stop()

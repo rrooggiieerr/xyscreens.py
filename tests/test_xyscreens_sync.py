@@ -65,12 +65,12 @@ def test_constructor_stopped():
 
 
 def test_constructor_negative_position():
-    with (pytest.raises(AssertionError),):
+    with (pytest.raises(ValueError),):
         XYScreens(URL, ADDRESS, 60, position=-0.00001)
 
 
 def test_constructor_toolarge_position():
-    with (pytest.raises(AssertionError),):
+    with (pytest.raises(ValueError),):
         XYScreens(URL, ADDRESS, 60, position=100.00001)
 
 
