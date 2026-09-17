@@ -51,7 +51,7 @@ ignore = "_version.py"
 recursive = "y"
 
 [tool.mypy]
-python_version = "3.11"
+python_version = "3.12"
 mypy_path = "xyscreens"
 
 [[tool.mypy.overrides]]
