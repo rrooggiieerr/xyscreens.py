@@ -8,9 +8,8 @@ https://docs.python.org/3/library/asyncio-task.html#creating-tasks
 """
 
 import asyncio
-from typing import Set
 
-background_tasks: Set[asyncio.Task] = set()
+background_tasks: set[asyncio.Task] = set()
 
 
 def save_task_reference(task: asyncio.Task) -> None:
