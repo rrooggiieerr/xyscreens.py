@@ -122,6 +122,8 @@ class XYScreens:
     _state: XYScreensState = XYScreensState.UP
     # Position of the screen where 0.0 is totally up and 100.0 is fully down.
     _position: float = 0.0
+    # Target position of the screen
+    _target_position = 0.0
     # Timestamp when the position was last recomputed
     _last_recompute_time: int = 0
 
@@ -184,6 +186,7 @@ class XYScreens:
             raise ValueError("position must be between 0.0 and 100.0")
 
         self._position = position
+        self._target_position = position
 
         # Define the current state of the screen based on the position of the screen. When the
         # screen position is set it is unknown if the screen is moving and in which direction.
@@ -423,14 +426,14 @@ class XYScreens:
 
         return await self._async_send_command(self._commands.micro_down)
 
-    def _target_position_reached(self, target_position: float) -> bool:
+    def _target_position_reached(self) -> bool:
         """Calculates if the target position has been reached."""
         self.update_status()
 
         if self._state == XYScreensState.DOWNWARD:
-            return self._position >= target_position
+            return self._position >= self._target_position
         if self._state == XYScreensState.UPWARD:
-            return self._position <= target_position
+            return self._position <= self._target_position
 
         # Target position has been reached
         return True
@@ -440,8 +443,10 @@ class XYScreens:
         if not 0.0 <= target_position <= 100.0:
             raise ValueError("target_position must be between 0.0 and 100.0")
 
-        if round(self._position) == round(target_position):
+        if round(self._position, 1) == round(target_position, 1):
             return self.stop()
+
+        self._target_position = target_position
 
         if self._position < target_position and not self.down():
             return False
@@ -450,7 +455,7 @@ class XYScreens:
 
         sleep_duration = min(self._up_duration, self._down_duration) / 1000.0
         while True:
-            if self._target_position_reached(target_position):
+            if self._target_position_reached():
                 if self._state in (XYScreensState.UPWARD, XYScreensState.DOWNWARD):
                     self.stop()
                 break
@@ -464,10 +469,10 @@ class XYScreens:
         if not 0.0 <= target_position <= 100.0:
             raise ValueError("target_position must be between 0.0 and 100.0")
 
-        if round(self._position) == round(target_position):
+        if round(self._position, 1) == round(target_position, 1):
             return await self.async_stop()
 
-        await self._cancel_set_position()
+        self._target_position = target_position
 
         if self._position < target_position:
             if not await self._async_send_command(self._commands.down):
@@ -478,11 +483,16 @@ class XYScreens:
                 return False
             self._post_up()
 
-        self._set_position_task = asyncio.create_task(
-            self._set_position_coroutine(target_position)
-        )
+        if (
+            self._set_position_task is None
+            or self._set_position_task.done()
+            or self._set_position_task.cancelled()
+        ):
+            self._set_position_task = asyncio.create_task(
+                self._set_position_coroutine()
+            )
 
-        save_task_reference(self._set_position_task)
+            save_task_reference(self._set_position_task)
 
         return True
 
@@ -512,11 +522,11 @@ class XYScreens:
 
         return self._set_position_task is None
 
-    async def _set_position_coroutine(self, target_position: float) -> None:
+    async def _set_position_coroutine(self) -> None:
         sleep_duration = min(self._up_duration, self._down_duration) / 1000.0
         while True:
             try:
-                target_position_reached = self._target_position_reached(target_position)
+                target_position_reached = self._target_position_reached()
 
                 self._update_callbacks()
 
@@ -525,6 +535,7 @@ class XYScreens:
                         XYScreensState.UPWARD,
                         XYScreensState.DOWNWARD,
                     ) and await self._async_send_command(self._commands.stop):
+                        self.update_status()
                         self._post_stop()
                         self._update_callbacks()
                     break
