@@ -126,7 +126,7 @@ class XYScreens:
     _last_recompute_time: int = 0
 
     # List of callbacks which need to be called when the screen status changes.
-    _callbacks: list[Any] | None = None
+    _callbacks: list[Callable[[XYScreensState, float], None]] | None = None
     # The task that handles the set position functionality in async mode.
     _set_position_task: asyncio.Task | None = None
 
