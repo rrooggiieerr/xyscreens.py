@@ -219,3 +219,18 @@ async def test_async_set_position_stop():
     state, position = screen.update_status()
     assert state == XYScreensState.STOPPED
     assert position == pytest.approx(50.0, 1)
+
+
+@pytest.mark.usefixtures("mock_async_serial")
+async def test_async_change_direction():
+    """Test changing the screen direction while it is moving."""
+    screen = XYScreens(URL, ADDRESS, 10, 10)
+    await screen.async_down()
+    await asyncio.sleep(5)
+    await screen.async_up()
+    state, position = screen.update_status()
+    assert state == XYScreensState.UPWARD
+    assert position == pytest.approx(50.0, 1)
+    await asyncio.sleep(5)
+    state, position = screen.update_status()
+    assert position == pytest.approx(100.0, 1)
