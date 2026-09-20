@@ -174,6 +174,7 @@ class XYScreens:
         self.restore_position(position)
 
         self._commands = XYScreensCommands(address)
+        self._io_lock = asyncio.Lock()
 
     def restore_position(self, position: float) -> None:
         """
@@ -200,7 +201,7 @@ class XYScreens:
         else:
             self._state = XYScreensState.STOPPED
 
-        self._last_recompute_time = time.time_ns()
+        self._last_recompute_time = time.monotonic_ns()
 
     def add_callback(self, callback: Callable[[XYScreensState, float], None]) -> None:
         """
@@ -260,23 +261,24 @@ class XYScreens:
 
     async def _async_send_command(self, command: bytes | None) -> bool:
         try:
-            async with serialx.async_serial_for_url(
-                self._url,
-                baudrate=2400,
-                byte_size=8,
-                parity=Parity.NONE,
-                stopbits=StopBits.ONE,
-                write_timeout=1,
-            ) as connection:
-                logger.debug("Device %s connected", self._url)
+            async with self._io_lock:
+                async with serialx.async_serial_for_url(
+                    self._url,
+                    baudrate=2400,
+                    byte_size=8,
+                    parity=Parity.NONE,
+                    stopbits=StopBits.ONE,
+                    write_timeout=1,
+                ) as connection:
+                    logger.debug("Device %s connected", self._url)
 
-                if command is not None:
-                    # Send the command.
-                    logger.debug("Sending: 0x%s", command.hex())
-                    await connection.write(command)
-                    logger.debug("Command successfully sent")
+                    if command is not None:
+                        # Send the command.
+                        logger.debug("Sending: 0x%s", command.hex())
+                        await connection.write(command)
+                        logger.debug("Command successfully sent")
 
-            return True
+                return True
         except (OSError, serialx.SerialException) as ex:
             raise XYScreensConnectionError() from ex
 
@@ -292,10 +294,10 @@ class XYScreens:
             direction = -1.0
             action_duration = self._up_duration
         else:
-            self._last_recompute_time = time.time_ns()
+            self._last_recompute_time = time.monotonic_ns()
             return (self._state, self._position)
 
-        now = time.time_ns()
+        now = time.monotonic_ns()
         time_delta = now - self._last_recompute_time
         movement = direction * time_delta / (action_duration * 10_000_000)
         position = self._position + movement
