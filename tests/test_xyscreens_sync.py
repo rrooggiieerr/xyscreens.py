@@ -182,7 +182,7 @@ def test_position_halfway():
     screen = XYScreens(URL, ADDRESS, 10, 10)
     screen.down()
     time.sleep(5)
-    assert screen.position() == pytest.approx(50.0, 1)
+    assert screen.position() == pytest.approx(50.0, abs=1)
 
 
 def test_change_direction_down():
@@ -192,7 +192,11 @@ def test_change_direction_down():
     screen.down()
     state, position = screen.update_status()
     assert state == XYScreensState.DOWNWARD
-    assert position == pytest.approx(50.0, 1)
+    assert position == pytest.approx(50.0, abs=1)
+    time.sleep(5)
+    state, position = screen.update_status()
+    assert position == pytest.approx(100.0, abs=1)
+
 
 
 def test_change_direction_up():
@@ -202,7 +206,10 @@ def test_change_direction_up():
     screen.up()
     state, position = screen.update_status()
     assert state == XYScreensState.UPWARD
-    assert position == pytest.approx(50.0, 1)
+    assert position == pytest.approx(50.0, abs=1)
+    time.sleep(5)
+    state, position = screen.update_status()
+    assert position == pytest.approx(0.0, abs=1)
 
 
 def test_set_position_downward():
@@ -210,7 +217,7 @@ def test_set_position_downward():
     screen.set_position(50.0)
     state, position = screen.update_status()
     assert state == XYScreensState.STOPPED
-    assert position == pytest.approx(50.0, 1)
+    assert position == pytest.approx(50.0, abs=1)
 
 
 def test_set_position_upward():
@@ -218,7 +225,7 @@ def test_set_position_upward():
     screen.set_position(50.0)
     state, position = screen.update_status()
     assert state == XYScreensState.STOPPED
-    assert position == pytest.approx(50.0, 1)
+    assert position == pytest.approx(50.0, abs=1)
 
 
 def test_restore_position_up():
