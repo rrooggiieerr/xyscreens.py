@@ -235,7 +235,6 @@ class XYScreens:
         return False
 
     def _send_command(self, command: bytes | None) -> bool:
-        connection = None
         try:
             # Create the connection instance.
             with serialx.serial_for_url(
@@ -318,7 +317,7 @@ class XYScreens:
         if self._callbacks is None:
             return
 
-        for callback in self._callbacks:
+        for callback in self._callbacks.copy():
             try:
                 callback(self._state, self._position)
             # pylint: disable=broad-exception-caught
@@ -345,10 +344,12 @@ class XYScreens:
     def up(self) -> bool:
         """Move the screen up."""
 
-        if self._send_command(self._commands.up):
-            return self._post_up()
+        if not self._send_command(self._commands.up):
+            return False
 
-        return False
+        self._post_up()
+
+        return True
 
     async def async_up(self) -> bool:
         """Move the screen up."""
@@ -381,21 +382,25 @@ class XYScreens:
     def stop(self) -> bool:
         """Stop the screen."""
 
-        if self._send_command(self._commands.stop):
-            return self._post_stop()
+        if not self._send_command(self._commands.stop):
+            return False
 
-        return False
+        self._post_stop()
+
+        return True
 
     async def async_stop(self) -> bool:
         """Stop the screen."""
 
         await self._cancel_set_position()
 
-        if await self._async_send_command(self._commands.stop) and self._post_stop():
-            self._update_callbacks()
-            return True
+        if not await self._async_send_command(self._commands.stop):
+            return False
 
-        return False
+        self._post_stop()
+        self._update_callbacks()
+
+        return True
 
     def _post_down(self) -> bool:
         if self._state not in (XYScreensState.DOWNWARD, XYScreensState.DOWN):
@@ -408,10 +413,12 @@ class XYScreens:
     def down(self) -> bool:
         """Move the screen down."""
 
-        if self._send_command(self._commands.down):
-            return self._post_down()
+        if not self._send_command(self._commands.down):
+            return False
 
-        return False
+        self._post_down()
+
+        return True
 
     async def async_down(self) -> bool:
         """Move the screen down."""
@@ -445,15 +452,21 @@ class XYScreens:
         if not 0.0 <= target_position <= 100.0:
             raise ValueError("target_position must be between 0.0 and 100.0")
 
-        if round(self._position, 1) == round(target_position, 1):
+        self.update_status()
+
+        if target_position not in [0.0, 100.0] and round(self._position, 1) == round(
+            target_position, 1
+        ):
             return self.stop()
 
         self._target_position = target_position
 
-        if self._position < target_position and not self.down():
-            return False
-        if self._position > target_position and not self.up():
-            return False
+        if target_position == 100.0 or self._position < target_position:
+            if not self.down():
+                return False
+        if target_position == 0.0 or self._position > target_position:
+            if not self.up():
+                return False
 
         sleep_duration = min(self._up_duration, self._down_duration) / 1000.0
         while True:
@@ -471,16 +484,18 @@ class XYScreens:
         if not 0.0 <= target_position <= 100.0:
             raise ValueError("target_position must be between 0.0 and 100.0")
 
-        if round(self._position, 1) == round(target_position, 1):
+        if target_position not in [0.0, 100.0] and round(self._position, 1) == round(
+            target_position, 1
+        ):
             return await self.async_stop()
 
         self._target_position = target_position
 
-        if self._position < target_position:
+        if target_position == 100.0 or self._position < target_position:
             if not await self._async_send_command(self._commands.down):
                 return False
             self._post_down()
-        elif self._position > target_position:
+        elif target_position == 0.0 or self._position > target_position:
             if not await self._async_send_command(self._commands.up):
                 return False
             self._post_up()
@@ -499,50 +514,48 @@ class XYScreens:
         return True
 
     async def _cancel_set_position(self) -> bool:
-        if self._set_position_task is not None and not (
-            self._set_position_task.done() or self._set_position_task.cancelled()
-        ):
-            if not self._set_position_task.cancel():
-                logger.error("Failed to cancel set position task")
-                logger.debug("Set position task: %s", self._set_position_task)
-                return False
-            try:
-                await self._set_position_task
-            except asyncio.CancelledError:
-                logger.debug("Set position task was cancelled")
-
         if self._set_position_task is not None:
-            if self._set_position_task.done() or self._set_position_task.cancelled():
-                self._set_position_task = None
-            else:
+            self._set_position_task.cancel()
+            _, pending = await asyncio.wait({self._set_position_task}, timeout=1)
+            if pending:
                 logger.error("Failed to cancel set position task")
                 logger.debug("Set position task: %s", self._set_position_task)
-                return False
-
-        self.update_status()
-        self._update_callbacks()
+            else:
+                self._set_position_task = None
 
         return self._set_position_task is None
 
     async def _set_position_coroutine(self) -> None:
         sleep_duration = min(self._up_duration, self._down_duration) / 1000.0
+
+        connection_error_count = 0
         while True:
             try:
                 target_position_reached = self._target_position_reached()
-
-                self._update_callbacks()
 
                 if target_position_reached:
                     if self._state in (
                         XYScreensState.UPWARD,
                         XYScreensState.DOWNWARD,
                     ) and await self._async_send_command(self._commands.stop):
-                        self.update_status()
                         self._post_stop()
-                        self._update_callbacks()
+                    self._update_callbacks()
                     break
 
+                self._update_callbacks()
+
                 await asyncio.sleep(sleep_duration)
+            except XYScreensConnectionError:
+                if connection_error_count == 0:
+                    logger.exception("Connection error")
+                connection_error_count += 1
+                if connection_error_count == 5:
+                    logger.error(
+                        "Could not stop the screen at %.1f%%; giving up",
+                        self._target_position,
+                    )
+                    break
+                await asyncio.sleep(0.1)
             except asyncio.CancelledError:
                 logger.debug("Set position task was canceled")
                 break
