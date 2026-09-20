@@ -64,7 +64,7 @@ See the documentation of your specific projector screen or lift on how to wire y
 
 You can also use a Serial/RS-485 to Ethernet/WiFi bridge, this is useful when the projector screen
 or lift is not close to your Home Assistant server. You can build your own bridge using
-[esp-link](https://github.com/jeelabs/esp-link) or buy an off the shelf product like the the
+[esp-link](https://github.com/jeelabs/esp-link) or buy an off the shelf product like the
 [CDEBYTE NA111-E](https://www.cdebyte.com/products/NA111-E/2).
 
 Connect the D+ and D- lines of your projector screen or lift to the corresponding terminals of the
