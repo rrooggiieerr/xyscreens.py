@@ -198,7 +198,6 @@ def test_change_direction_down():
     assert position == pytest.approx(100.0, abs=1)
 
 
-
 def test_change_direction_up():
     screen = XYScreens(URL, ADDRESS, 10, 10)
     screen.down()
