@@ -82,6 +82,15 @@ async def test_async_down():
 
 
 @pytest.mark.usefixtures("mock_async_serial")
+async def test_async_down_when_down():
+    screen = XYScreens(URL, ADDRESS, 5, 5, 100)
+    assert await screen.async_down() is True
+    state, position = screen.update_status()
+    assert state == XYScreensState.DOWN
+    assert position == 100.0
+
+
+@pytest.mark.usefixtures("mock_async_serial")
 async def test_async_down_with_callback():
     screen = XYScreens(URL, ADDRESS, 5, 5)
     callback = Mock()
@@ -96,6 +105,15 @@ async def test_async_up():
     screen = XYScreens(URL, ADDRESS, 5, 5, 100)
     assert await screen.async_up() is True
     await asyncio.sleep(5.1)
+    state, position = screen.update_status()
+    assert state == XYScreensState.UP
+    assert position == 0.0
+
+
+@pytest.mark.usefixtures("mock_async_serial")
+async def test_async_up_when_up():
+    screen = XYScreens(URL, ADDRESS, 5, 5)
+    assert await screen.async_up() is True
     state, position = screen.update_status()
     assert state == XYScreensState.UP
     assert position == 0.0
@@ -195,9 +213,10 @@ async def test_async_change_direction_down():
     state, position = screen.update_status()
     assert state == XYScreensState.DOWNWARD
     assert position == pytest.approx(50.0, abs=1)
-    await asyncio.sleep(5)
+    await asyncio.sleep(5.1)
     state, position = screen.update_status()
-    assert position == pytest.approx(100.0, abs=1)
+    assert state == XYScreensState.DOWN
+    assert position == 100.0
 
 
 @pytest.mark.usefixtures("mock_async_serial")
@@ -210,9 +229,10 @@ async def test_async_change_direction_up():
     state, position = screen.update_status()
     assert state == XYScreensState.UPWARD
     assert position == pytest.approx(50.0, abs=1)
-    await asyncio.sleep(5)
+    await asyncio.sleep(5.1)
     state, position = screen.update_status()
-    assert position == pytest.approx(0.0, abs=1)
+    assert state == XYScreensState.UP
+    assert position == 0.0
 
 
 @pytest.mark.usefixtures("mock_async_serial")
@@ -226,6 +246,15 @@ async def test_async_set_position_downward():
 
 
 @pytest.mark.usefixtures("mock_async_serial")
+async def test_async_set_position_downward_when_down():
+    screen = XYScreens(URL, ADDRESS, 10, 10, 100)
+    await screen.async_set_position(100.0)
+    state, position = screen.update_status()
+    assert state == XYScreensState.DOWN
+    assert position == 100.0
+
+
+@pytest.mark.usefixtures("mock_async_serial")
 async def test_async_set_position_upward():
     screen = XYScreens(URL, ADDRESS, 10, 10, 100.0)
     await screen.async_set_position(50.0)
@@ -233,6 +262,15 @@ async def test_async_set_position_upward():
     state, position = screen.update_status()
     assert state == XYScreensState.STOPPED
     assert position == pytest.approx(50.0, abs=1)
+
+
+@pytest.mark.usefixtures("mock_async_serial")
+async def test_async_set_position_upward_when_up():
+    screen = XYScreens(URL, ADDRESS, 10, 10)
+    await screen.async_set_position(0.0)
+    state, position = screen.update_status()
+    assert state == XYScreensState.UP
+    assert position == 0.0
 
 
 @pytest.mark.usefixtures("mock_async_serial")
