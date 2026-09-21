@@ -38,7 +38,7 @@ async def main(url: str, address: bytes, wait: int, action: str) -> None:
                 state, position = screen.update_status()
                 _print_status(state, position)
                 if state == XYScreensState.UP:
-                    if _LOGGER.level <= logging.DEBUG:
+                    if not _LOGGER.isEnabledFor(logging.DEBUG):
                         print()
                     break
                 await asyncio.sleep(0.1)
@@ -51,7 +51,7 @@ async def main(url: str, address: bytes, wait: int, action: str) -> None:
                 state, position = screen.update_status()
                 _print_status(state, position)
                 if state == XYScreensState.DOWN:
-                    if _LOGGER.level <= logging.DEBUG:
+                    if not _LOGGER.isEnabledFor(logging.DEBUG):
                         print()
                     break
                 await asyncio.sleep(0.1)
