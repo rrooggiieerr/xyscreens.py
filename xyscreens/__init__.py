@@ -275,6 +275,7 @@ class XYScreens:
                         # Send the command.
                         logger.debug("Sending: 0x%s", command.hex())
                         await connection.write(command)
+                        await connection.drain()
                         logger.debug("Command successfully sent")
 
                 return True
