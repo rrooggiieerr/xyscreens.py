@@ -513,21 +513,22 @@ class XYScreens:
         if not 0.0 <= target_position <= 100.0:
             raise ValueError("target_position must be between 0.0 and 100.0")
 
-        if target_position not in [0.0, 100.0] and round(self._position, 1) == round(
+        if target_position == 100.0 or round(self._position, 1) < round(
             target_position, 1
         ):
-            return await self.async_stop()
-
-        self._target_position = target_position
-
-        if target_position == 100.0 or self._position < target_position:
             if not await self._async_send_command(self._commands.down):
                 return False
+            self._target_position = target_position
             self._post_down()
-        elif target_position == 0.0 or self._position > target_position:
+        elif target_position == 0.0 or round(self._position, 1) > round(
+            target_position, 1
+        ):
             if not await self._async_send_command(self._commands.up):
                 return False
+            self._target_position = target_position
             self._post_up()
+        else:
+            return await self.async_stop()
 
         if (
             self._set_position_task is None
