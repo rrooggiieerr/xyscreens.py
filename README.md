@@ -33,9 +33,9 @@ are sold around the world under various brand names.
 The **XY Screens** and **See Max** projector screens and lifts do not provide any positional
 feedback. The state of the screen is thus always an assumed one. The screen position is calculated
 based on the time the cover has moved and the configured up and down durations. This results in a
-potential error margin. Every time the screen reaches its maximum up or down position the position
-any potential error is reset. If the screen is controlled outside the library, for instance with
-the remote control, the screen position and state will no longer represent the actual state.
+potential error margin. Every time the screen reaches its maximum up or down position any potential
+position error is reset. If the screen is controlled outside the library, for instance with the
+remote control, the screen position and state will no longer represent the actual state.
 
 ## Hardware
 
@@ -71,7 +71,7 @@ Connect the D+ and D- lines of your projector screen or lift to the correspondin
 bridge. See the documentation of your specific projector screen or lift on how to wire yours
 correctly.
 
-Configure the bridge for 2400 baud, 8 bytes, no parity and one stopbit to match the projector
+Configure the bridge for 2400 baud, 8 bits, no parity and one stopbit to match the projector
 screen or lift protocol.
 
 Use `socket://<ip address>:<port>` or `rfc2217://<ip address>:<port>` as the URL to connect to the
