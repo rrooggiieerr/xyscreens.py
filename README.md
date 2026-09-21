@@ -154,9 +154,11 @@ Some **See Max** projector screens and lifts which use the RS-485 interface seem
 programming the device address. This way multiple devices can be connected to the same RS-485
 interface. Each device should have a unique address.
 
-`python3 -m xyscreens <URL> <address> program`  
+`python3 -m xyscreens <URL> <address> program`
 
 Where `<address>` is the three byte address to be programmed.
+
+**⚠️ Only run this command with one device connected to the RS-485 bus.**
 
 ### Testing all commands
 
@@ -164,6 +166,8 @@ To test the supported commands of a projector screens you can test each command 
 `0xFF` and see how the device responds.
 
 `python3 -m xyscreens <URL> <address> test_commands`
+
+**⚠️ Only run this command with one device connected to the RS-485 bus.**
 
 ### Troubleshooting
 
