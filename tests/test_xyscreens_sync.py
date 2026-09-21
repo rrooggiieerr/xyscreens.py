@@ -26,7 +26,6 @@ def mock_base_serial() -> Generator[Mock, None, None]:
         ) as mock_connection,
     ):
         connection = mock_connection.return_value
-        connection.from_url = Mock(side_effect=OSError())
 
         yield connection
 
