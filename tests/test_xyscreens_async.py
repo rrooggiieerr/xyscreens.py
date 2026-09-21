@@ -12,7 +12,7 @@ from serialx import SerialException
 
 from xyscreens import XYScreens, XYScreensState
 
-from . import ADDRESS, NAN, URL
+from . import ADDRESS, INF, NAN, URL
 
 
 @pytest.fixture()
@@ -316,3 +316,9 @@ async def test_async_set_position_nan(mock_async_serial: AsyncMock):
     screen = XYScreens(URL, ADDRESS, 60)
     with pytest.raises(ValueError):
         await screen.async_set_position(NAN)
+
+
+async def test_async_set_position_inf(mock_async_serial: AsyncMock):
+    screen = XYScreens(URL, ADDRESS, 60)
+    with pytest.raises(ValueError):
+        await screen.async_set_position(INF)

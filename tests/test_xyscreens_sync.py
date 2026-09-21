@@ -12,7 +12,7 @@ from serialx import SerialException
 
 from xyscreens import XYScreens, XYScreensState
 
-from . import ADDRESS, NAN, URL
+from . import ADDRESS, INF, NAN, URL
 
 
 @pytest.fixture(autouse=True)
@@ -73,6 +73,11 @@ def test_constructor_nan_down_duration():
         XYScreens(URL, ADDRESS, NAN)
 
 
+def test_constructor_inf_down_duration():
+    with (pytest.raises(ValueError),):
+        XYScreens(URL, ADDRESS, INF)
+
+
 def test_constructor_negative_up_duration():
     with (pytest.raises(ValueError),):
         XYScreens(URL, ADDRESS, 60, -0.00001)
@@ -81,6 +86,11 @@ def test_constructor_negative_up_duration():
 def test_constructor_nan_up_duration():
     with (pytest.raises(ValueError),):
         XYScreens(URL, ADDRESS, 60, NAN)
+
+
+def test_constructor_inf_up_duration():
+    with (pytest.raises(ValueError),):
+        XYScreens(URL, ADDRESS, 60, INF)
 
 
 def test_constructor_negative_position():
@@ -96,6 +106,11 @@ def test_constructor_toolarge_position():
 def test_constructor_nan_position():
     with (pytest.raises(ValueError),):
         XYScreens(URL, ADDRESS, 60, 60, NAN)
+
+
+def test_constructor_inf_position():
+    with (pytest.raises(ValueError),):
+        XYScreens(URL, ADDRESS, 60, 60, INF)
 
 
 def test_test_connection():
@@ -312,6 +327,12 @@ def test_set_position_nan():
         screen.set_position(NAN)
 
 
+def test_set_position_inf():
+    screen = XYScreens(URL, ADDRESS, 10, 10)
+    with (pytest.raises(ValueError),):
+        screen.set_position(INF)
+
+
 def test_restore_position_up():
     screen = XYScreens(URL, ADDRESS, 60)
     screen.restore_position(0.0)
@@ -352,3 +373,9 @@ def test_restore_position_nan():
     screen = XYScreens(URL, ADDRESS, 60)
     with pytest.raises(ValueError):
         screen.restore_position(NAN)
+
+
+def test_restore_position_inf():
+    screen = XYScreens(URL, ADDRESS, 60)
+    with pytest.raises(ValueError):
+        screen.restore_position(INF)

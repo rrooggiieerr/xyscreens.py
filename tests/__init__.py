@@ -13,3 +13,4 @@ URL = "/dev/cu.some_port"
 ADDRESS = b"\xaa\xee\xee"
 
 NAN = float("nan")
+INF = float("inf")

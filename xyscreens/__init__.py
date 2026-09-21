@@ -152,9 +152,15 @@ class XYScreens:
         if len(address) != 3:
             raise ValueError("address must contain exactly 3 bytes")
 
-        if math.isnan(down_duration) or down_duration <= 0.0:
+        if (
+            math.isnan(down_duration)
+            or math.isinf(down_duration)
+            or down_duration <= 0.0
+        ):
             raise ValueError("down_duration must be greater than 0")
-        if up_duration is not None and (math.isnan(up_duration) or up_duration <= 0.0):
+        if up_duration is not None and (
+            math.isnan(up_duration) or math.isinf(up_duration) or up_duration <= 0.0
+        ):
             raise ValueError("up_duration must be greater than 0")
 
         if not 0.0 <= position <= 100.0:
