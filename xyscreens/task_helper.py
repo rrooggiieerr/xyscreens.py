@@ -8,11 +8,12 @@ https://docs.python.org/3/library/asyncio-task.html#creating-tasks
 """
 
 import asyncio
+from typing import Any
 
-background_tasks: set[asyncio.Task] = set()
+background_tasks: set[asyncio.Task[Any]] = set()
 
 
-def save_task_reference(task: asyncio.Task) -> None:
+def save_task_reference(task: asyncio.Task[Any]) -> None:
     """
     To avoid a task disappearing mid-execution a reference to the task needs to be saved.
     """

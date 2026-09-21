@@ -119,20 +119,22 @@ class XYScreens:
     _down_duration: float
     # The commands that apply for this screen
     _commands: XYScreensCommands
+    # IO lock to prevent overlapping access to the serial port
+    _io_lock: asyncio.Lock
 
     # Current state of the screen. Defaults to Up when object is created.
     _state: XYScreensState = XYScreensState.UP
     # Position of the screen where 0.0 is totally up and 100.0 is fully down.
     _position: float = 0.0
     # Target position of the screen
-    _target_position = 0.0
+    _target_position: float = 0.0
     # Timestamp when the position was last recomputed
     _last_recompute_time: int = 0
 
     # List of callbacks which need to be called when the screen status changes.
     _callbacks: list[Callable[[XYScreensState, float], None]] | None = None
     # The task that handles the set position functionality in async mode.
-    _set_position_task: asyncio.Task | None = None
+    _set_position_task: asyncio.Task[None] | None = None
 
     def __init__(
         self,
