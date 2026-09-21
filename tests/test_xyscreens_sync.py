@@ -12,7 +12,7 @@ from serialx import SerialException
 
 from xyscreens import XYScreens, XYScreensState
 
-from . import ADDRESS, URL
+from . import ADDRESS, NAN, URL
 
 
 @pytest.fixture(autouse=True)
@@ -63,6 +63,26 @@ def test_constructor_stopped():
     assert screen.position() == 50.0
 
 
+def test_constructor_negative_down_duration():
+    with (pytest.raises(ValueError),):
+        XYScreens(URL, ADDRESS, -0.00001)
+
+
+def test_constructor_nan_down_duration():
+    with (pytest.raises(ValueError),):
+        XYScreens(URL, ADDRESS, NAN)
+
+
+def test_constructor_negative_up_duration():
+    with (pytest.raises(ValueError),):
+        XYScreens(URL, ADDRESS, 60, -0.00001)
+
+
+def test_constructor_nan_up_duration():
+    with (pytest.raises(ValueError),):
+        XYScreens(URL, ADDRESS, 60, NAN)
+
+
 def test_constructor_negative_position():
     with (pytest.raises(ValueError),):
         XYScreens(URL, ADDRESS, 60, position=-0.00001)
@@ -71,6 +91,11 @@ def test_constructor_negative_position():
 def test_constructor_toolarge_position():
     with (pytest.raises(ValueError),):
         XYScreens(URL, ADDRESS, 60, position=100.00001)
+
+
+def test_constructor_nan_position():
+    with (pytest.raises(ValueError),):
+        XYScreens(URL, ADDRESS, 60, 60, NAN)
 
 
 def test_test_connection():
@@ -269,6 +294,24 @@ def test_set_position_upward_when_up():
     assert position == 0.0
 
 
+def test_set_position_negative_position():
+    screen = XYScreens(URL, ADDRESS, 10, 10)
+    with (pytest.raises(ValueError),):
+        screen.set_position(-0.00001)
+
+
+def test_set_position_toolarge_position():
+    screen = XYScreens(URL, ADDRESS, 10, 10)
+    with (pytest.raises(ValueError),):
+        screen.set_position(100.00001)
+
+
+def test_set_position_nan():
+    screen = XYScreens(URL, ADDRESS, 10, 10)
+    with (pytest.raises(ValueError),):
+        screen.set_position(NAN)
+
+
 def test_restore_position_up():
     screen = XYScreens(URL, ADDRESS, 60)
     screen.restore_position(0.0)
@@ -291,3 +334,21 @@ def test_restore_position_halfway():
     state, position = screen.update_status()
     assert state == XYScreensState.STOPPED
     assert position == 50.0
+
+
+def test_restore_position_negative_position():
+    screen = XYScreens(URL, ADDRESS, 60)
+    with (pytest.raises(ValueError),):
+        screen.restore_position(-0.00001)
+
+
+def test_restore_position_toolarge_position():
+    screen = XYScreens(URL, ADDRESS, 60)
+    with pytest.raises(ValueError):
+        screen.restore_position(100.00001)
+
+
+def test_restore_position_nan():
+    screen = XYScreens(URL, ADDRESS, 60)
+    with pytest.raises(ValueError):
+        screen.restore_position(NAN)

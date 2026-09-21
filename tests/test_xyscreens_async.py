@@ -12,7 +12,7 @@ from serialx import SerialException
 
 from xyscreens import XYScreens, XYScreensState
 
-from . import ADDRESS, URL
+from . import ADDRESS, NAN, URL
 
 
 @pytest.fixture()
@@ -298,3 +298,21 @@ async def test_async_set_position_stop(mock_async_serial: AsyncMock):
     state, position = screen.update_status()
     assert state == XYScreensState.STOPPED
     assert position == pytest.approx(50.0, abs=1)
+
+
+async def test_async_set_position_negative_position():
+    screen = XYScreens(URL, ADDRESS, 10, 10)
+    with pytest.raises(ValueError):
+        await screen.async_set_position(-0.00001)
+
+
+async def test_async_set_position_toolarge_position():
+    screen = XYScreens(URL, ADDRESS, 10, 10)
+    with pytest.raises(ValueError):
+        await screen.async_set_position(100.00001)
+
+
+async def test_async_set_position_nan(mock_async_serial: AsyncMock):
+    screen = XYScreens(URL, ADDRESS, 60)
+    with pytest.raises(ValueError):
+        await screen.async_set_position(NAN)
