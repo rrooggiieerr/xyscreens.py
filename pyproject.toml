@@ -11,7 +11,7 @@ source = "vcs"
 [project]
 name = "xyscreens"
 dynamic = ["version"]
-license = {text = "Apache-2.0"}
+license = "Apache-2.0"
 authors = [
     { name="Rogier van Staveren", email="rogier@batoid.com" }
 ]
@@ -23,7 +23,6 @@ classifiers = [
     "Programming Language :: Python :: 3.13",
     "Programming Language :: Python :: 3.14",
     "Intended Audience :: Developers",
-    "License :: OSI Approved :: Apache Software License",
     "Operating System :: POSIX",
     "Operating System :: MacOS :: MacOS X",
     "Topic :: Software Development :: Libraries :: Python Modules",
