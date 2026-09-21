@@ -30,7 +30,7 @@ classifiers = [
     "Topic :: Home Automation"
 ]
 dependencies = [
-    "serialx>=1.8.0"
+    "serialx>=1.10.0"
 ]
 
 [project.urls]
@@ -54,7 +54,7 @@ python_version = "3.12"
 mypy_path = "xyscreens"
 
 [[tool.mypy.overrides]]
-module = ["serial.*", "serial_asyncio_fast.*", "*._version"]
+module = ["serialx.*", "*._version"]
 ignore_missing_imports = true
 
 [tool.pytest.ini_options]
