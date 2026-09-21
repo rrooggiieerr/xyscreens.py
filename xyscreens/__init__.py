@@ -498,6 +498,7 @@ class XYScreens:
                 return False
 
         sleep_duration = min(self._up_duration, self._down_duration) / 1000.0
+        sleep_duration = max(sleep_duration, 0.1)
         while True:
             if self._target_position_reached():
                 if self._state in (XYScreensState.UPWARD, XYScreensState.DOWNWARD):
@@ -557,6 +558,7 @@ class XYScreens:
 
     async def _set_position_coroutine(self) -> None:
         sleep_duration = min(self._up_duration, self._down_duration) / 1000.0
+        sleep_duration = max(sleep_duration, 0.1)
 
         connection_error_count = 0
         while True:
