@@ -211,7 +211,9 @@ class XYScreens:
 
         self._last_recompute_time = time.monotonic_ns()
 
-    def add_callback(self, callback: Callable[[XYScreensState, float], None]) -> None:
+    def add_callback(
+        self, callback: Callable[[XYScreensState, float], None]
+    ) -> Callable[[], None]:
         """
         Adds a callback.
         """
@@ -219,6 +221,22 @@ class XYScreens:
             self._callbacks = []
 
         self._callbacks.append(callback)
+
+        return lambda: self.remove_callback(callback)
+
+    def remove_callback(
+        self, callback: Callable[[XYScreensState, float], None]
+    ) -> None:
+        """
+        Removes a callback.
+        """
+        if self._callbacks is None:
+            return
+
+        try:
+            self._callbacks.remove(callback)
+        except ValueError:
+            pass
 
     def test_connection(self) -> bool:
         """

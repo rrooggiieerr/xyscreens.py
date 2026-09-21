@@ -72,6 +72,29 @@ async def test_async_test_connection_esphome_non_existing_host():
         assert not await screen.async_test_connection()
 
 
+def test_remove_callback():
+    screen = XYScreens(URL, ADDRESS, 60)
+    callback = Mock()
+    screen.add_callback(callback)
+    screen.remove_callback(callback)
+    screen._update_callbacks()
+    callback.assert_not_called()
+
+
+def test_remove_callback_not_registered():
+    screen = XYScreens(URL, ADDRESS, 60)
+    screen.remove_callback(Mock())
+
+
+def test_add_callback_returns_remove_function():
+    screen = XYScreens(URL, ADDRESS, 60)
+    callback = Mock()
+    remove = screen.add_callback(callback)
+    remove()
+    screen._update_callbacks()
+    callback.assert_not_called()
+
+
 async def test_async_down(mock_async_serial: AsyncMock):
     screen = XYScreens(URL, ADDRESS, 5, 5)
     assert await screen.async_down() is True
