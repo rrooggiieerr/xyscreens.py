@@ -7,8 +7,9 @@ Created on 18 Nov 2022
 import argparse
 import asyncio
 import logging
+import sys
 
-from xyscreens import XYScreens, XYScreensState
+from xyscreens import XYScreens, XYScreensConnectionError, XYScreensState
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -28,6 +29,7 @@ async def main(url: str, address: bytes, wait: int, action: str) -> None:
     else:
         down_duration = wait
 
+    screen = None
     try:
         if action == "up":
             screen = XYScreens(url, address, down_duration, position=100.0)
@@ -74,9 +76,10 @@ async def main(url: str, address: bytes, wait: int, action: str) -> None:
                     await screen.async_micro_down()
                 case "program":
                     await screen.async_program()
-    except KeyboardInterrupt:
-        # Handle keyboard interrupt
-        pass
+    except asyncio.CancelledError:
+        if screen is not None:
+            await screen.async_stop()
+        raise
 
 
 if __name__ == "__main__":
@@ -120,8 +123,13 @@ if __name__ == "__main__":
     else:
         logging.basicConfig(format="%(message)s", level=logging.INFO)
 
-    loop = asyncio.new_event_loop()
     try:
         asyncio.run(main(args.url, bytes.fromhex(args.address), args.wait, args.action))
-    finally:
-        loop.close()
+        sys.exit(0)
+    except XYScreensConnectionError:
+        _LOGGER.error("Connection error")
+    except KeyboardInterrupt:
+        # Handle keyboard interrupt
+        print()
+
+    sys.exit(1)
