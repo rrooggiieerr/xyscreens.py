@@ -6,6 +6,8 @@ Created on 17 Nov 2022
 @author: Rogier van Staveren
 """
 
+import math
+
 try:
     from ._version import __version__ as __version__
 except ModuleNotFoundError:
@@ -150,9 +152,9 @@ class XYScreens:
         if len(address) != 3:
             raise ValueError("address must contain exactly 3 bytes")
 
-        if down_duration <= 0.0:
+        if math.isnan(down_duration) or down_duration <= 0.0:
             raise ValueError("down_duration must be greater than 0")
-        if up_duration is not None and up_duration <= 0.0:
+        if up_duration is not None and (math.isnan(up_duration) or up_duration <= 0.0):
             raise ValueError("up_duration must be greater than 0")
 
         if not 0.0 <= position <= 100.0:
