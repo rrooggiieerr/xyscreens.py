@@ -115,7 +115,7 @@ class XYScreens:
     _url: str
     # The amount of time in seconds it takes the screen to close from the fully-open state.
     _up_duration: float
-    # The amount of time in seconds it takes the screen to open up from the fully-closed state.
+    # The amount of time in seconds it takes the screen to open from the fully-closed state.
     _down_duration: float
     # The commands that apply for this screen
     _commands: XYScreensCommands
