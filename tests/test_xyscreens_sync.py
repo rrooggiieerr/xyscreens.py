@@ -293,6 +293,17 @@ def test_set_position_downward_when_down():
     assert position == 100.0
 
 
+def test_set_position_downward_different_updown_durations():
+    screen = XYScreens(URL, ADDRESS, 10, 20)
+    now = time.monotonic()
+    screen.set_position(50.0)
+    elapsed = time.monotonic() - now
+    state, position = screen.update_status()
+    assert state == XYScreensState.STOPPED
+    assert position == pytest.approx(50.0, abs=1)
+    assert elapsed == pytest.approx(5.0, abs=1)
+
+
 def test_set_position_upward():
     screen = XYScreens(URL, ADDRESS, 10, 10, 100.0)
     screen.set_position(50.0)
@@ -307,6 +318,17 @@ def test_set_position_upward_when_up():
     state, position = screen.update_status()
     assert state == XYScreensState.UP
     assert position == 0.0
+
+
+def test_set_position_upward_different_updown_durations():
+    screen = XYScreens(URL, ADDRESS, 10, 20, 100.0)
+    now = time.monotonic()
+    screen.set_position(50.0)
+    elapsed = time.monotonic() - now
+    state, position = screen.update_status()
+    assert state == XYScreensState.STOPPED
+    assert position == pytest.approx(50.0, abs=1)
+    assert elapsed == pytest.approx(10.0, abs=1)
 
 
 def test_set_position_negative_position():
