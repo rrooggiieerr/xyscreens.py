@@ -288,6 +288,20 @@ async def test_async_set_position_downward_when_down(mock_async_serial: AsyncMoc
     assert position == 100.0
 
 
+async def test_async_set_position_downward_different_updown_durations(
+    mock_async_serial: AsyncMock,
+):
+    screen = XYScreens(URL, ADDRESS, 10, 20)
+    await screen.async_set_position(50.0)
+    mock_async_serial.write.assert_awaited_once_with(b"\xff" + ADDRESS + b"\xee")
+    mock_async_serial.reset_mock()
+    await asyncio.sleep(5.1)
+    mock_async_serial.write.assert_awaited_once_with(b"\xff" + ADDRESS + b"\xcc")
+    state, position = screen.update_status()
+    assert state == XYScreensState.STOPPED
+    assert position == pytest.approx(50.0, abs=1)
+
+
 async def test_async_set_position_upward(mock_async_serial: AsyncMock):
     screen = XYScreens(URL, ADDRESS, 10, 10, 100.0)
     await screen.async_set_position(50.0)
@@ -307,6 +321,20 @@ async def test_async_set_position_upward_when_up(mock_async_serial: AsyncMock):
     state, position = screen.update_status()
     assert state == XYScreensState.UP
     assert position == 0.0
+
+
+async def test_async_set_position_upward_different_updown_durations(
+    mock_async_serial: AsyncMock,
+):
+    screen = XYScreens(URL, ADDRESS, 10, 20, 100.0)
+    await screen.async_set_position(50.0)
+    mock_async_serial.write.assert_awaited_once_with(b"\xff" + ADDRESS + b"\xdd")
+    mock_async_serial.reset_mock()
+    await asyncio.sleep(10.1)
+    mock_async_serial.write.assert_awaited_once_with(b"\xff" + ADDRESS + b"\xcc")
+    state, position = screen.update_status()
+    assert state == XYScreensState.STOPPED
+    assert position == pytest.approx(50.0, abs=1)
 
 
 async def test_async_set_position_stop(mock_async_serial: AsyncMock):
