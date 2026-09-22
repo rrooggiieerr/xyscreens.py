@@ -128,7 +128,7 @@ class XYScreens:
     _position: float = 0.0
     # Target position of the screen
     _target_position: float = 0.0
-    # The distance that the screen needs tot travel
+    # The distance that the screen needs to travel
     _distance = 0
     # Timestamp when the position was last recomputed
     _last_recompute_time: int = 0
@@ -140,7 +140,7 @@ class XYScreens:
 
     def __init__(
         self,
-        url: str,  # URL to the RS-485 interface there the screen is connected to.
+        url: str,  # URL to the interface where the screen is connected to.
         address: bytes,
         down_duration: float,  # Duration in seconds for the screen to go down.
         up_duration: (

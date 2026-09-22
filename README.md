@@ -15,7 +15,7 @@ This Python library lets you control [**XY Screens**](https://www.xyscreen.com/)
 projector screens and lifts over the serial and RS-485 interface.
 
 This Python library was first implemented for **XY Screens**. After I was informed that the
-**See Max** devices use a very similar protocol support for these devices has been added.
+**See Max** devices use a very similar protocol, support for these devices has been added.
 
 **XY Screens** and **See Max** are OEM manufacturers of projector screens and lifts. Their devices
 are sold around the world under various brand names.
@@ -41,7 +41,7 @@ remote control, the screen position and state will no longer represent the actua
 
 ### RS-485 to USB adapter
 
-Use a RS-485 to USB adapter where position 5 of the RJ25 connector is connected to D+ and position
+Use an RS-485 to USB adapter where position 5 of the RJ25 connector is connected to D+ and position
 6 to D-.
 
 ![image](https://raw.githubusercontent.com/rrooggiieerr/xyscreens.py/main/wiring.png)
@@ -71,7 +71,7 @@ Connect the D+ and D- lines of your projector screen or lift to the correspondin
 bridge. See the documentation of your specific projector screen or lift on how to wire yours
 correctly.
 
-Configure the bridge for 2400 baud, 8 bits, no parity and one stopbit to match the projector
+Configure the bridge for 2400 baud, 8 bits, no parity and one stop bit to match the projector
 screen or lift protocol.
 
 Use `socket://<ip address>:<port>` or `rfc2217://<ip address>:<port>` as the URL to connect to the
@@ -89,7 +89,7 @@ Use `esphome://<ip address>:<port>/?port_name=<port name>` as the URL to connect
 If your device follows the following protocol it is supported by this Python library:
 
 2400 baud 8N1  
-Up command  : `0xFF 0xXX 0xXX 0xXX 0xDD`  
+Up command: `0xFF 0xXX 0xXX 0xXX 0xDD`  
 Down command: `0xFF 0xXX 0xXX 0xXX 0xEE`  
 Stop command: `0xFF 0xXX 0xXX 0xXX 0xCC`
 
@@ -162,7 +162,7 @@ Where `<address>` is the three byte address to be programmed.
 
 ### Testing all commands
 
-To test the supported commands of a projector screens you can test each command from `0x00` to
+To test the supported commands of a projector screen you can test each command from `0x00` to
 `0xFF` and see how the device responds.
 
 `python3 -m xyscreens <URL> <address> test_commands`
@@ -202,7 +202,7 @@ greatly appreciated and keeps me motivated:
 
 ### Hire me
 
-If you're in need for a freelance Python developer for your project please contact me, you can find
+If you're in need of a freelance Python developer for your project please contact me, you can find
 my email address on [my GitHub profile](https://github.com/rrooggiieerr).
 
 [python-shield]: https://img.shields.io/badge/python-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54
