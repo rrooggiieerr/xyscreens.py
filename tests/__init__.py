@@ -3,6 +3,7 @@ XY Screens Unit Tests.
 """
 
 import logging
+import math
 
 logging.basicConfig(
     format="%(asctime)s %(levelname)-8s %(filename)s:%(lineno)d %(message)s",
@@ -12,5 +13,5 @@ logging.basicConfig(
 URL = "/dev/cu.some_port"
 ADDRESS = b"\xaa\xee\xee"
 
-NAN = float("nan")
-INF = float("inf")
+NAN = math.nan
+INF = math.inf

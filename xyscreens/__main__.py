@@ -1,5 +1,4 @@
-"""
-Created on 18 Nov 2022
+"""Created on 18 Nov 2022.
 
 @author: Rogier van Staveren
 """
@@ -24,10 +23,7 @@ def _print_status(state: XYScreensState, position: float) -> None:
 async def main(url: str, address: bytes, wait: int, action: str) -> None:
     """Execute the main CLI logic for controlling XY Screens."""
 
-    if wait <= 0:
-        down_duration = 1
-    else:
-        down_duration = wait
+    down_duration = 1 if wait <= 0 else wait
 
     screen = None
     try:
@@ -62,7 +58,7 @@ async def main(url: str, address: bytes, wait: int, action: str) -> None:
             for i in range(256):
                 print(f"Trying command 0x{i.to_bytes(1).hex()}")
                 command = b"\xff" + address + i.to_bytes(1)
-                await screen._async_send_command(command)
+                await screen._async_send_command(command) # noqa: SLF001
                 await asyncio.sleep(5)
                 await screen.async_stop()
         else:
@@ -127,7 +123,7 @@ if __name__ == "__main__":
         asyncio.run(main(args.url, bytes.fromhex(args.address), args.wait, args.action))
         sys.exit(0)
     except XYScreensConnectionError:
-        _LOGGER.error("Connection error")
+        _LOGGER.exception("Connection error")
     except KeyboardInterrupt:
         # Handle keyboard interrupt
         print()

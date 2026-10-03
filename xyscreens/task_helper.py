@@ -1,8 +1,4 @@
-"""
-To avoid a task disappearing mid-execution a reference to the task needs to be saved. The event
-loop only keeps weak references to tasks. A task that isn't referenced elsewhere may get garbage
-collected at any time, even before it's done. For reliable "fire-and-forget" background tasks,
-gather them in a collection.
+"""To avoid a task disappearing mid-execution a reference to the task needs to be saved. The event loop only keeps weak references to tasks. A task that isn't referenced elsewhere may get garbage collected at any time, even before it's done. For reliable "fire-and-forget" background tasks, gather them in a collection.
 
 https://docs.python.org/3/library/asyncio-task.html#creating-tasks
 """
@@ -14,9 +10,7 @@ background_tasks: set[asyncio.Task[Any]] = set()
 
 
 def save_task_reference(task: asyncio.Task[Any]) -> None:
-    """
-    To avoid a task disappearing mid-execution a reference to the task needs to be saved.
-    """
+    """To avoid a task disappearing mid-execution a reference to the task needs to be saved."""
     # Add task to the set. This creates a strong reference.
     background_tasks.add(task)
 

@@ -1,23 +1,21 @@
-"""
-Implements the XYScreens library for controlling XY Screens projector screens and projector lifts.
+"""Implements the XYScreens library for controlling XY Screens projector screens and projector lifts.
 
 Created on 17 Nov 2022
 
 @author: Rogier van Staveren
 """
 
+import contextlib
 import math
 
-try:
+with contextlib.suppress(ModuleNotFoundError):
     from ._version import __version__ as __version__
-except ModuleNotFoundError:
-    pass
 
 import asyncio
-import logging
-import time
 from collections.abc import Callable
 from enum import IntEnum
+import logging
+import time
 from typing import Final, override
 
 import serialx
@@ -29,15 +27,14 @@ logger: Final = logging.getLogger(__name__)
 
 
 class XYScreensConnectionError(Exception):
-    """
-    XY Screens Connection Error.
+    """XY Screens Connection Error.
 
     When an error occurs while connecting to the projector screen or lift.
     """
 
 
 class XYScreensCommands:
-    """The commands needed to move and stop the screen"""
+    """The commands needed to move and stop the screen."""
 
     _PREFIX = b"\xff"
     _UP = b"\xdd"
@@ -48,6 +45,7 @@ class XYScreensCommands:
     _PROGRAM = b"\xaa"
 
     def __init__(self, address: bytes):
+        """Initializes commands."""
         self._address = address
 
     @property
@@ -189,9 +187,7 @@ class XYScreens:
         self._io_lock = asyncio.Lock()
 
     def restore_position(self, position: float) -> None:
-        """
-        Restores the position of the screen, mainly introduced to restore the screen state in Home
-        Assistant.
+        """Restores the position of the screen, mainly introduced to restore the screen state in Home Assistant.
 
         Not to be used to move the screen to a position
         """
@@ -218,9 +214,7 @@ class XYScreens:
     def add_callback(
         self, callback: Callable[[XYScreensState, float], None]
     ) -> Callable[[], None]:
-        """
-        Adds a callback.
-        """
+        """Adds a callback."""
         if self._callbacks is None:
             self._callbacks = []
 
@@ -231,39 +225,27 @@ class XYScreens:
     def remove_callback(
         self, callback: Callable[[XYScreensState, float], None]
     ) -> None:
-        """
-        Removes a callback.
-        """
+        """Removes a callback."""
         if self._callbacks is None:
             return
 
-        try:
+        with contextlib.suppress(ValueError):
             self._callbacks.remove(callback)
-        except ValueError:
-            pass
 
         if len(self._callbacks) == 0:
             self._callbacks = None
 
     def test_connection(self) -> bool:
-        """
-        Test if a connection can be established.
-        """
-        try:
+        """Test if a connection can be established."""
+        with contextlib.suppress(XYScreensConnectionError):
             return self._send_command(None)
-        except XYScreensConnectionError:
-            pass
 
         return False
 
     async def async_test_connection(self) -> bool:
-        """
-        Test if a connection can be established.
-        """
-        try:
+        """Test if a connection can be established."""
+        with contextlib.suppress(XYScreensConnectionError):
             return await self._async_send_command(None)
-        except XYScreensConnectionError:
-            pass
 
         return False
 
@@ -286,10 +268,10 @@ class XYScreens:
                     connection.write(command)
                     connection.flush()
                     logger.debug("Command successfully sent")
-
-            return True
         except (OSError, serialx.SerialException) as ex:
-            raise XYScreensConnectionError() from ex
+            raise XYScreensConnectionError from ex
+        else:
+            return True
 
     async def _async_send_command(self, command: bytes | None) -> bool:
         try:
@@ -313,13 +295,10 @@ class XYScreens:
 
                 return True
         except (OSError, serialx.SerialException) as ex:
-            raise XYScreensConnectionError() from ex
+            raise XYScreensConnectionError from ex
 
     def update_status(self) -> tuple[XYScreensState, float]:
-        """
-        Calculates and returns the status and position of the screen based on the direction the
-        screen is moving.
-        """
+        """Calculates and returns the status and position of the screen based on the direction the screen is moving."""
         if self._state == XYScreensState.DOWNWARD:
             direction = 1.0
             action_duration = self._down_duration
@@ -601,7 +580,7 @@ class XYScreens:
                             logger.exception("Connection error")
                         connection_error_count += 1
                         if connection_error_count == 5:
-                            logger.error(
+                            logger.exception(
                                 "Could not stop the screen at %.1f%%; giving up",
                                 self._target_position,
                             )
@@ -620,9 +599,7 @@ class XYScreens:
         return state
 
     def position(self) -> float:
-        """
-        Returns the current position of the screen where 0.0 is totally up and 100.0 is fully down.
-        """
+        """Returns the current position of the screen where 0.0 is totally up and 100.0 is fully down."""
         _, position = self.update_status()
 
         return position

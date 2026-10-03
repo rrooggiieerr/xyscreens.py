@@ -1,7 +1,5 @@
 """Asynchronous unit test for the XYScreens library"""
 
-# pylint: disable=missing-function-docstring
-
 import asyncio
 from collections.abc import Generator
 from socket import gaierror
@@ -9,14 +7,13 @@ from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
 from serialx import SerialException
-
 from xyscreens import XYScreens, XYScreensState
 
-from . import ADDRESS, INF, NAN, URL
+from tests import ADDRESS, INF, NAN, URL
 
 
-@pytest.fixture()
-def mock_async_serial() -> Generator[AsyncMock, None, None]:
+@pytest.fixture
+def mock_async_serial() -> Generator[AsyncMock]:
     """Mock serialx AsyncSerial."""
 
     with (
@@ -353,23 +350,31 @@ async def test_async_set_position_stop(mock_async_serial: AsyncMock):
 
 async def test_async_set_position_negative_position():
     screen = XYScreens(URL, ADDRESS, 10, 10)
-    with pytest.raises(ValueError):
+    with pytest.raises(
+        ValueError, match="target_position must be between 0.0 and 100.0"
+    ):
         await screen.async_set_position(-0.00001)
 
 
 async def test_async_set_position_toolarge_position():
     screen = XYScreens(URL, ADDRESS, 10, 10)
-    with pytest.raises(ValueError):
+    with pytest.raises(
+        ValueError, match="target_position must be between 0.0 and 100.0"
+    ):
         await screen.async_set_position(100.00001)
 
 
 async def test_async_set_position_nan(mock_async_serial: AsyncMock):
     screen = XYScreens(URL, ADDRESS, 60)
-    with pytest.raises(ValueError):
+    with pytest.raises(
+        ValueError, match="target_position must be between 0.0 and 100.0"
+    ):
         await screen.async_set_position(NAN)
 
 
 async def test_async_set_position_inf(mock_async_serial: AsyncMock):
     screen = XYScreens(URL, ADDRESS, 60)
-    with pytest.raises(ValueError):
+    with pytest.raises(
+        ValueError, match="target_position must be between 0.0 and 100.0"
+    ):
         await screen.async_set_position(INF)

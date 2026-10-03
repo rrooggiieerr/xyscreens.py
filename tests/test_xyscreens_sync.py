@@ -1,22 +1,19 @@
 """Synchronous unit test for the XYScreens library"""
 
-# pylint: disable=missing-function-docstring
-
-import time
 from collections.abc import Generator
 from socket import gaierror
+import time
 from unittest.mock import Mock, patch
 
 import pytest
 from serialx import SerialException
-
 from xyscreens import XYScreens, XYScreensState
 
 from . import ADDRESS, INF, NAN, URL
 
 
 @pytest.fixture(autouse=True)
-def mock_base_serial() -> Generator[Mock, None, None]:
+def mock_base_serial() -> Generator[Mock]:
     """Mock serialx BaseSerial."""
 
     with (
@@ -64,52 +61,72 @@ def test_constructor_stopped():
 
 
 def test_constructor_negative_down_duration():
-    with (pytest.raises(ValueError),):
+    with (
+        pytest.raises(ValueError, match="down_duration must be greater than 0"),
+    ):
         XYScreens(URL, ADDRESS, -0.00001)
 
 
 def test_constructor_nan_down_duration():
-    with (pytest.raises(ValueError),):
+    with (
+        pytest.raises(ValueError, match="down_duration must be greater than 0"),
+    ):
         XYScreens(URL, ADDRESS, NAN)
 
 
 def test_constructor_inf_down_duration():
-    with (pytest.raises(ValueError),):
+    with (
+        pytest.raises(ValueError, match="down_duration must be greater than 0"),
+    ):
         XYScreens(URL, ADDRESS, INF)
 
 
 def test_constructor_negative_up_duration():
-    with (pytest.raises(ValueError),):
+    with (
+        pytest.raises(ValueError, match="up_duration must be greater than 0"),
+    ):
         XYScreens(URL, ADDRESS, 60, -0.00001)
 
 
 def test_constructor_nan_up_duration():
-    with (pytest.raises(ValueError),):
+    with (
+        pytest.raises(ValueError, match="up_duration must be greater than 0"),
+    ):
         XYScreens(URL, ADDRESS, 60, NAN)
 
 
 def test_constructor_inf_up_duration():
-    with (pytest.raises(ValueError),):
+    with (
+        pytest.raises(ValueError, match="up_duration must be greater than 0"),
+    ):
         XYScreens(URL, ADDRESS, 60, INF)
 
 
 def test_constructor_negative_position():
-    with (pytest.raises(ValueError),):
+    with (
+        pytest.raises(ValueError, match="position must be between 0.0 and 100.0"),
+    ):
         XYScreens(URL, ADDRESS, 60, position=-0.00001)
 
 
 def test_constructor_toolarge_position():
-    with (pytest.raises(ValueError),):
+    with (
+        pytest.raises(ValueError, match="position must be between 0.0 and 100.0"),
+    ):
         XYScreens(URL, ADDRESS, 60, position=100.00001)
 
 
 def test_constructor_nan_position():
-    with (pytest.raises(ValueError),):
+    with (
+        pytest.raises(ValueError, match="position must be between 0.0 and 100.0"),
+    ):
         XYScreens(URL, ADDRESS, 60, 60, NAN)
 
 
 def test_constructor_inf_position():
-    with (pytest.raises(ValueError),):
+    with (
+        pytest.raises(ValueError, match="position must be between 0.0 and 100.0"),
+    ):
         XYScreens(URL, ADDRESS, 60, 60, INF)
 
 
@@ -333,25 +350,41 @@ def test_set_position_upward_different_updown_durations():
 
 def test_set_position_negative_position():
     screen = XYScreens(URL, ADDRESS, 10, 10)
-    with (pytest.raises(ValueError),):
+    with (
+        pytest.raises(
+            ValueError, match="target_position must be between 0.0 and 100.0"
+        ),
+    ):
         screen.set_position(-0.00001)
 
 
 def test_set_position_toolarge_position():
     screen = XYScreens(URL, ADDRESS, 10, 10)
-    with (pytest.raises(ValueError),):
+    with (
+        pytest.raises(
+            ValueError, match="target_position must be between 0.0 and 100.0"
+        ),
+    ):
         screen.set_position(100.00001)
 
 
 def test_set_position_nan():
     screen = XYScreens(URL, ADDRESS, 10, 10)
-    with (pytest.raises(ValueError),):
+    with (
+        pytest.raises(
+            ValueError, match="target_position must be between 0.0 and 100.0"
+        ),
+    ):
         screen.set_position(NAN)
 
 
 def test_set_position_inf():
     screen = XYScreens(URL, ADDRESS, 10, 10)
-    with (pytest.raises(ValueError),):
+    with (
+        pytest.raises(
+            ValueError, match="target_position must be between 0.0 and 100.0"
+        ),
+    ):
         screen.set_position(INF)
 
 
@@ -381,23 +414,25 @@ def test_restore_position_halfway():
 
 def test_restore_position_negative_position():
     screen = XYScreens(URL, ADDRESS, 60)
-    with (pytest.raises(ValueError),):
+    with (
+        pytest.raises(ValueError, match="position must be between 0.0 and 100.0"),
+    ):
         screen.restore_position(-0.00001)
 
 
 def test_restore_position_toolarge_position():
     screen = XYScreens(URL, ADDRESS, 60)
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="position must be between 0.0 and 100.0"):
         screen.restore_position(100.00001)
 
 
 def test_restore_position_nan():
     screen = XYScreens(URL, ADDRESS, 60)
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="position must be between 0.0 and 100.0"):
         screen.restore_position(NAN)
 
 
 def test_restore_position_inf():
     screen = XYScreens(URL, ADDRESS, 60)
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="position must be between 0.0 and 100.0"):
         screen.restore_position(INF)
