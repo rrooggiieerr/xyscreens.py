@@ -1,5 +1,5 @@
 [build-system]
-requires = ["hatchling>=1.29", "hatch-vcs"]
+requires = ["hatchling>=1.32.4", "hatch-vcs"]
 build-backend = "hatchling.build"
 
 [tool.hatch.build.hooks.vcs]
@@ -38,7 +38,7 @@ classifiers = [
     "Typing :: Typed",
 ]
 dependencies = [
-    "serialx>=1.10.0"
+    "serialx>=1.15.0"
 ]
 
 [project.urls]
@@ -352,13 +352,13 @@ python_version = "3.14"
 packages = ["xyscreens"]
 
 [[tool.mypy.overrides]]
-module = ["serialx.*", "*._version"]
+module = ["*._version"]
 ignore_missing_imports = true
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
 asyncio_default_fixture_loop_scope = "function"
-# Import nad_serial from the project without installing it first.
+# Import xyscreens from the project without installing it first.
 pythonpath = ["."]
 testpaths = ["tests"]
 
@@ -370,8 +370,7 @@ ignore-regex = 'EdgeEnhancement\.Treshold'
 # https://docs.astral.sh/ruff/settings/
 # Formats like black (line length 88) and sorts imports like isort.
 target-version = "py314"
-extend-exclude = ["nad_serial/_version.py"]
-src = ["xyscreens", "tests"]
+extend-exclude = ["xyscreens/_version.py"]
 
 [tool.ruff.lint]
 # Following Home Assistant Core rules
@@ -513,7 +512,7 @@ mark-parentheses = false
 
 [tool.ruff.lint.isort]
 force-sort-within-sections = true
-known-first-party = ["nad_serial"]
+known-first-party = ["xyscreens"]
 combine-as-imports = true
 split-on-trailing-comma = false
 
