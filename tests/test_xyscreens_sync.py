@@ -7,6 +7,7 @@ from unittest.mock import Mock, patch
 
 import pytest
 from serialx import SerialException
+
 from xyscreens import XYScreens, XYScreensState
 
 from . import ADDRESS, INF, NAN, URL

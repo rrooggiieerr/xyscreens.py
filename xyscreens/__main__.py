@@ -58,7 +58,7 @@ async def main(url: str, address: bytes, wait: int, action: str) -> None:
             for i in range(256):
                 print(f"Trying command 0x{i.to_bytes(1).hex()}")
                 command = b"\xff" + address + i.to_bytes(1)
-                await screen._async_send_command(command) # noqa: SLF001
+                await screen._async_send_command(command)  # noqa: SLF001
                 await asyncio.sleep(5)
                 await screen.async_stop()
         else:

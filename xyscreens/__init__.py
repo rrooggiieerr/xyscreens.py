@@ -127,7 +127,7 @@ class XYScreens:
     # Target position of the screen
     _target_position: float = 0.0
     # The distance that the screen needs to travel
-    _distance = 0
+    _distance = 0.0
     # Timestamp when the position was last recomputed
     _last_recompute_time: int = 0
 
@@ -148,7 +148,6 @@ class XYScreens:
         # fully down.
     ) -> None:
         """Initialises the XYScreens object."""
-        # pylint: disable=too-many-arguments
 
         # Validate the different arguments.
         if len(address) != 3:
@@ -333,7 +332,6 @@ class XYScreens:
         for callback in self._callbacks.copy():
             try:
                 callback(self._state, self._position)
-            # pylint: disable=broad-exception-caught
             except Exception:
                 logger.exception("Exception in callback: %s", callback)
 
@@ -353,7 +351,6 @@ class XYScreens:
 
         return False
 
-    # pylint: disable=C0103
     def up(self) -> bool:
         """Move the screen up."""
 

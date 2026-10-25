@@ -7,9 +7,9 @@ from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
 from serialx import SerialException
-from xyscreens import XYScreens, XYScreensState
 
 from tests import ADDRESS, INF, NAN, URL
+from xyscreens import XYScreens, XYScreensState
 
 
 @pytest.fixture
