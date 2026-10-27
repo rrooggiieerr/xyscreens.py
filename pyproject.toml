@@ -38,7 +38,7 @@ classifiers = [
     "Typing :: Typed",
 ]
 dependencies = [
-    "serialx>=1.15.0"
+    "serialx>=1.11.0"
 ]
 
 [project.urls]
